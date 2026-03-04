@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Physio Guide
+
+물리치료사가 환자에게 맞춤 운동 처방을 제공하고, 환자는 QR코드/링크를 통해 처방된 운동을 확인할 수 있는 웹 애플리케이션입니다.
+
+## Features
+
+- **환자용 화면** — 신체 부위별 운동 목록 조회 및 단계별 가이드 + 호흡 타이머
+- **처방전 공유** — 고유 토큰 기반 URL로 환자 맞춤 처방전 공유 (QR코드 지원)
+- **관리자 페이지** — 물리치료사가 운동 처방 생성·관리 (비밀번호 인증)
+- **신체 부위 필터** — 목·어깨·허리·무릎 등 8개 부위별 운동 분류
+
+## Tech Stack
+
+| Category | Stack |
+|---|---|
+| Framework | [Next.js 16](https://nextjs.org/) (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| State | React 19 (useState / useEffect) |
+| Cookie | js-cookie |
+| QR Code | qrcode.react |
+
+## Project Structure
+
+```
+physio-guide/
+├── app/
+│   ├── admin/
+│   │   ├── page.tsx          # 관리자 로그인
+│   │   └── manage/page.tsx   # 처방 관리 (운동 추가·삭제·QR 발급)
+│   ├── api/
+│   │   ├── auth/route.ts     # 관리자 인증 API
+│   │   ├── exercises/route.ts
+│   │   └── prescriptions/route.ts
+│   ├── components/
+│   │   ├── BreathingTimer.tsx
+│   │   └── ExerciseSVG.tsx
+│   ├── exercise/[id]/page.tsx  # 운동 상세 (단계 + 호흡 가이드)
+│   ├── exercises/page.tsx      # 부위별 운동 목록
+│   ├── p/[token]/page.tsx      # 환자 처방전 페이지
+│   └── page.tsx                # 신체 부위 선택 홈
+├── data/
+│   ├── exercises.json
+│   └── prescriptions.json
+└── public/
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm / yarn / pnpm / bun
+
+### Installation
+
+```bash
+git clone https://github.com/9Jun6/physio-guide.git
+cd physio-guide
+npm install
+```
+
+### Environment Variables
+
+프로젝트 루트에 `.env.local` 파일을 생성하세요.
+
+```env
+ADMIN_PASSWORD=your_admin_password
+```
+
+### Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000) 을 열어 확인하세요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build & Start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+| Role | Path | Description |
+|---|---|---|
+| 환자 | `/` | 신체 부위 선택 후 운동 목록 확인 |
+| 환자 | `/p/:token` | QR코드·링크로 처방전 확인 |
+| 물리치료사 | `/admin` | 관리자 로그인 |
+| 물리치료사 | `/admin/manage` | 운동 처방 생성 및 QR코드 발급 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
