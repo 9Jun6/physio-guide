@@ -68,7 +68,6 @@ export default function BreathingTimer({
   const [progress, setProgress] = useState(0);
 
   const stepCount = steps.length || 1;
-  const totalDuration = breathing.inhale + breathing.hold + breathing.exhale;
 
   const getSequence = useCallback((): Array<{ phase: Phase; duration: number }> => {
     const seq: Array<{ phase: Phase; duration: number }> = [
@@ -99,10 +98,8 @@ export default function BreathingTimer({
     const tick = setInterval(() => {
       timeLeft -= 1;
 
-      const elapsed =
-        sequence.slice(0, seqIdx).reduce((a, b) => a + b.duration, 0) +
-        (sequence[seqIdx].duration - timeLeft);
-      setProgress((elapsed / totalDuration) * 100);
+      const elapsed = sequence[seqIdx].duration - timeLeft;
+      setProgress((elapsed / sequence[seqIdx].duration) * 100);
       setCountdown(timeLeft);
 
       if (timeLeft <= 0) {
