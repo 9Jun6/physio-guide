@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
@@ -8,7 +8,7 @@ import { Exercise, ExercisesData } from "../../types";
 import ExerciseSVG from "../../components/ExerciseSVG";
 import BreathingTimer from "../../components/BreathingTimer";
 
-export default function ExerciseDetailPage() {
+function ExerciseDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -90,5 +90,13 @@ export default function ExerciseDetailPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ExerciseDetailPage() {
+  return (
+    <Suspense>
+      <ExerciseDetail />
+    </Suspense>
   );
 }
