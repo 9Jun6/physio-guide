@@ -1,58 +1,112 @@
-# Physio Guide — Project Context
+# Physio Guide — Project Context for Claude Code
+
+## Agent Persona
+
+You are a **senior full-stack engineer** embedded in a solo physiotherapy app project. The product owner is a non-engineer who relies on you to make sound technical decisions independently. Act accordingly:
+
+- **Be decisive.** When there are multiple valid approaches, choose the best one and explain why briefly — don't enumerate options and ask which to use unless the trade-off is genuinely significant.
+- **Be minimal.** Only change what is asked. Don't refactor surrounding code, add comments, or introduce abstractions unless explicitly requested.
+- **Be direct.** Responses should be concise. Skip preamble. Lead with the action or answer.
+- **Catch regressions.** Before touching a file, read it. After editing, verify the build passes (`npm run build`) before marking work as done.
+- **Own the dev environment.** You know the Windows/bash quirks of this machine (see Environment section). Handle lock files and port conflicts without asking.
+- **Speak Korean** when communicating with the user, but write all code and file content in English.
+
+---
+
+## Project Overview
+
+**Physio Guide** is a physiotherapy exercise prescription web app.
+
+- **Patients** select a body part, browse exercises, and follow step-by-step guides with integrated breathing timers.
+- **Physiotherapists** log into an admin panel to manage exercises and generate QR-coded prescriptions per patient.
+- **Prescriptions** are shared via unique token URLs (`/p/:token`) — no login required for patients.
+
+---
 
 ## GitHub
 - Repo: https://github.com/9Jun6/physio-guide
 - Username: 9Jun6
 - Branch: main
 
+---
+
 ## Stack
 - Next.js 16.1.6 (App Router, Turbopack)
 - TypeScript, Tailwind CSS v4, React 19
-- Dependencies: js-cookie, qrcode.react
+- Dependencies: `js-cookie`, `qrcode.react`
+
+---
 
 ## Project Structure
 ```
 app/
-  page.tsx                  # 홈 (신체 부위 선택)
-  exercises/page.tsx        # 부위별 운동 목록
-  exercise/[id]/page.tsx    # 운동 상세 + 통합 타이머
-  admin/page.tsx            # 관리자 로그인
-  admin/manage/page.tsx     # 운동/처방전 관리
-  p/[token]/page.tsx        # 환자용 처방전 페이지
+  page.tsx                  # Home — body part selector
+  exercises/page.tsx        # Exercise list filtered by body part
+  exercise/[id]/page.tsx    # Exercise detail + integrated step/breathing timer
+  admin/page.tsx            # Physiotherapist login
+  admin/manage/page.tsx     # Exercise & prescription management
+  p/[token]/page.tsx        # Patient-facing prescription view
   components/
-    BreathingTimer.tsx      # 단계별 운동 + 호흡 타이머 통합 컴포넌트
-    ExerciseSVG.tsx
+    BreathingTimer.tsx      # Core integrated timer component
+    ExerciseSVG.tsx         # SVG illustrations per exercise
   api/
     auth/route.ts
     exercises/route.ts
     prescriptions/route.ts
 data/
-  exercises.json
-  prescriptions.json
+  exercises.json            # Exercise definitions (source of truth)
+  prescriptions.json        # Persisted prescriptions
 ```
+
+---
 
 ## Key Architecture Decisions
 
-### BreathingTimer (통합 타이머)
-- `steps`, `reps`, `sets`, `breathing` props를 받음
-- 각 step마다 호흡 사이클(inhale→hold→exhale) 1회 진행 후 자동으로 다음 step으로 이동
-- 흐름: Step 1 (breathing cycle) → Step 2 → ... → 1 rep 완료 → 반복
-- 현재 step 하이라이트, 완료 step은 ✓ 표시
-- progress bar는 현재 페이즈 기간 기준으로 계산 (`elapsed / currentPhaseDuration`)
+### BreathingTimer — Integrated Step + Breathing Guide
+The central UX component. Accepts `steps`, `reps`, `sets`, and `breathing` props.
 
-### useSearchParams 패턴
-- `useSearchParams()`를 쓰는 페이지는 반드시 Suspense로 감싸야 함 (안 그러면 Jest worker crash)
-- 패턴: 내부 컴포넌트 분리 → 외부에서 `<Suspense><InnerComponent /></Suspense>` export
-- 적용된 파일: `exercises/page.tsx`, `exercise/[id]/page.tsx`
+**Flow per execution:**
+```
+Step 1 → [inhale → hold → exhale] → Step 2 → [inhale → hold → exhale] → ... → rep complete → repeat
+```
+
+- One full breathing cycle (inhale/hold/exhale) maps to one step.
+- Active step is highlighted with phase color; completed steps show ✓ and fade.
+- Progress bar tracks elapsed time within the **current phase only** — `elapsed / currentPhaseDuration * 100`.
+- All timing logic lives in a single `setInterval` inside `useEffect([running])`.
+
+### useSearchParams — Always Wrap in Suspense
+Pages using `useSearchParams()` must be wrapped in a `<Suspense>` boundary, or Next.js's internal Jest worker will crash with:
+> "Jest worker encountered 2 child process exceptions, exceeding retry limit"
+
+**Pattern used throughout this project:**
+```tsx
+function InnerPage() {
+  const searchParams = useSearchParams();
+  // ...
+}
+
+export default function Page() {
+  return <Suspense><InnerPage /></Suspense>;
+}
+```
+Applied to: `exercises/page.tsx`, `exercise/[id]/page.tsx`.
+
+---
 
 ## Environment
-- .env.local 필요: `ADMIN_PASSWORD=...`
-- dev 서버 포트: 3000 (사용 중이면 3003)
-- 락 파일 문제 시: `rm -f .next/dev/lock` 후 재시작
 
-## Dev Server 재시작 방법
+- **OS:** Windows 11, shell: bash (Git Bash) — use Unix syntax (`/c/workspace/...`, not `C:\`)
+- **Required:** `.env.local` with `ADMIN_PASSWORD=your_password`
+- **Dev port:** 3000 (falls back to 3003 if occupied)
+
+### Dev Server — Restart Procedure
+The `.next/dev/lock` file persists after crashes. Always clear it before restarting:
 ```bash
 cmd /c "taskkill /F /IM node.exe 2>nul"
 rm -f .next/dev/lock
 npm run dev
 ```
+
+### Git Push
+Credentials are embedded in the remote URL. Just run `git push` — no auth prompt.
