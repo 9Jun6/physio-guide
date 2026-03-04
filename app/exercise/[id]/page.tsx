@@ -74,31 +74,17 @@ export default function ExerciseDetailPage() {
             </div>
           </div>
 
-          {/* 운동 순서 */}
+          {/* 단계별 운동 + 호흡 타이머 통합 */}
           <div>
-            <h2 className="font-bold text-slate-700 mb-3">운동 방법</h2>
-            <ol className="space-y-2">
-              {exercise.steps.map((step, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold flex items-center justify-center">
-                    {i + 1}
-                  </span>
-                  <span className="text-slate-600 text-sm leading-relaxed">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* 호흡 타이머 */}
-          <div>
-            <h2 className="font-bold text-slate-700 mb-1">호흡 타이머</h2>
-            <p className="text-xs text-slate-400 mb-2">
-              시작 버튼을 누르면 호흡에 맞춰 안내해 드려요.
+            <h2 className="font-bold text-slate-700 mb-1">운동 가이드</h2>
+            <p className="text-xs text-slate-400 mb-3">
+              시작하면 각 단계마다 호흡에 맞춰 자동으로 안내해 드려요.
             </p>
             <BreathingTimer
               breathing={exercise.breathing}
               reps={exercise.reps}
               sets={exercise.sets}
+              steps={exercise.steps}
             />
           </div>
         </div>
