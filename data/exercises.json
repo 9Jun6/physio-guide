@@ -1,0 +1,320 @@
+{
+  "bodyParts": ["목", "어깨", "허리", "무릎", "발목", "고관절", "팔꿈치", "손목"],
+  "exercises": [
+    {
+      "id": "neck-1",
+      "name": "목 좌우 스트레칭",
+      "bodyPart": "목",
+      "description": "목 옆 근육의 긴장을 풀어주는 기본 스트레칭입니다.",
+      "steps": [
+        "바르게 앉아 정면을 바라봅니다.",
+        "천천히 오른쪽 귀를 오른쪽 어깨 방향으로 기울입니다.",
+        "15~30초 유지 후 반대쪽도 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 4 },
+      "reps": 5,
+      "sets": 2,
+      "svgKey": "neck-side"
+    },
+    {
+      "id": "neck-2",
+      "name": "목 전후 스트레칭",
+      "bodyPart": "목",
+      "description": "목 앞뒤 근육을 늘려주어 자세 교정에 도움을 줍니다.",
+      "steps": [
+        "바르게 앉아 턱을 천천히 가슴 방향으로 내립니다.",
+        "10초 유지 후 천천히 원래 자세로 돌아옵니다.",
+        "이번엔 천장을 바라보듯 머리를 뒤로 젖힙니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 4 },
+      "reps": 5,
+      "sets": 2,
+      "svgKey": "neck-front-back"
+    },
+    {
+      "id": "neck-3",
+      "name": "목 회전 운동",
+      "bodyPart": "목",
+      "description": "목의 회전 범위를 늘리고 경직을 완화합니다.",
+      "steps": [
+        "정면을 바라보고 바르게 앉습니다.",
+        "천천히 고개를 오른쪽으로 돌려 5초 유지합니다.",
+        "다시 정면을 보고 반대쪽도 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 5,
+      "sets": 2,
+      "svgKey": "neck-rotate"
+    },
+    {
+      "id": "shoulder-1",
+      "name": "어깨 돌리기",
+      "bodyPart": "어깨",
+      "description": "어깨 관절의 가동 범위를 넓히고 긴장을 풀어줍니다.",
+      "steps": [
+        "팔을 자연스럽게 내린 상태로 섭니다.",
+        "양 어깨를 앞에서 뒤로 천천히 크게 돌립니다.",
+        "5회 반복 후 반대 방향으로도 돌립니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 2,
+      "svgKey": "shoulder-roll"
+    },
+    {
+      "id": "shoulder-2",
+      "name": "팔 가로 스트레칭",
+      "bodyPart": "어깨",
+      "description": "어깨 후면 근육을 이완시키는 스트레칭입니다.",
+      "steps": [
+        "오른팔을 가슴 앞으로 뻗습니다.",
+        "왼팔로 오른 팔꿈치를 감싸 몸 쪽으로 당깁니다.",
+        "15~20초 유지 후 반대쪽도 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 3,
+      "sets": 2,
+      "svgKey": "shoulder-cross"
+    },
+    {
+      "id": "shoulder-3",
+      "name": "벽 밀기 운동",
+      "bodyPart": "어깨",
+      "description": "어깨 안정화 근육을 강화합니다.",
+      "steps": [
+        "벽 앞에 서서 양손을 어깨 높이로 벽에 댑니다.",
+        "팔꿈치를 천천히 구부려 벽 쪽으로 다가갑니다.",
+        "다시 팔을 펴며 원래 자세로 돌아옵니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 3,
+      "svgKey": "shoulder-wall"
+    },
+    {
+      "id": "back-1",
+      "name": "무릎 가슴 당기기",
+      "bodyPart": "허리",
+      "description": "허리 근육을 이완시키고 하부 요통을 완화합니다.",
+      "steps": [
+        "바닥에 등을 대고 눕습니다.",
+        "양 무릎을 천천히 가슴 쪽으로 당깁니다.",
+        "20~30초 유지 후 천천히 내립니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 5,
+      "sets": 2,
+      "svgKey": "back-knee-chest"
+    },
+    {
+      "id": "back-2",
+      "name": "고양이-소 스트레칭",
+      "bodyPart": "허리",
+      "description": "척추 유연성을 높이고 허리 근육을 강화합니다.",
+      "steps": [
+        "네 발 자세로 손과 무릎을 바닥에 댑니다.",
+        "숨을 내쉬며 등을 천장 방향으로 둥글게 말아올립니다.",
+        "숨을 들이쉬며 배를 바닥 방향으로 내리고 고개를 듭니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 2,
+      "svgKey": "back-cat-cow"
+    },
+    {
+      "id": "back-3",
+      "name": "골반 틸트 운동",
+      "bodyPart": "허리",
+      "description": "요추 안정화에 효과적인 기본 운동입니다.",
+      "steps": [
+        "등을 대고 누워 무릎을 세웁니다.",
+        "복부에 힘을 주며 허리를 바닥에 살짝 눌러붙입니다.",
+        "5초 유지 후 천천히 이완합니다."
+      ],
+      "breathing": { "inhale": 2, "hold": 5, "exhale": 4 },
+      "reps": 10,
+      "sets": 3,
+      "svgKey": "back-pelvic-tilt"
+    },
+    {
+      "id": "knee-1",
+      "name": "대퇴사두근 스트레칭",
+      "bodyPart": "무릎",
+      "description": "무릎 앞쪽 허벅지 근육을 이완시킵니다.",
+      "steps": [
+        "한 손으로 벽을 잡고 섭니다.",
+        "반대 손으로 발목을 잡아 발을 엉덩이 쪽으로 당깁니다.",
+        "20~30초 유지 후 반대쪽 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 3,
+      "sets": 2,
+      "svgKey": "knee-quad-stretch"
+    },
+    {
+      "id": "knee-2",
+      "name": "무릎 구부리기 운동",
+      "bodyPart": "무릎",
+      "description": "무릎 주변 근력을 강화하는 기본 운동입니다.",
+      "steps": [
+        "의자에 앉아 등을 바르게 합니다.",
+        "한쪽 다리를 천천히 펴며 수평이 되도록 들어올립니다.",
+        "5초 유지 후 천천히 내립니다. 반대쪽 반복."
+      ],
+      "breathing": { "inhale": 2, "hold": 5, "exhale": 4 },
+      "reps": 10,
+      "sets": 3,
+      "svgKey": "knee-extension"
+    },
+    {
+      "id": "knee-3",
+      "name": "햄스트링 스트레칭",
+      "bodyPart": "무릎",
+      "description": "무릎 뒤쪽 근육을 이완시켜 무릎 통증을 줄여줍니다.",
+      "steps": [
+        "바닥에 앉아 다리를 앞으로 뻗습니다.",
+        "허리를 곧게 편 채 천천히 상체를 앞으로 기울입니다.",
+        "발끝을 향해 손을 뻗고 20~30초 유지합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 3,
+      "sets": 2,
+      "svgKey": "knee-hamstring"
+    },
+    {
+      "id": "ankle-1",
+      "name": "발목 돌리기",
+      "bodyPart": "발목",
+      "description": "발목 관절의 가동 범위를 회복시킵니다.",
+      "steps": [
+        "의자에 앉아 한쪽 다리를 들어올립니다.",
+        "발목을 시계 방향으로 천천히 크게 돌립니다.",
+        "10회 후 반시계 방향으로 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 2,
+      "svgKey": "ankle-circle"
+    },
+    {
+      "id": "ankle-2",
+      "name": "발목 위아래 운동",
+      "bodyPart": "발목",
+      "description": "발목 앞뒤 근육을 강화합니다.",
+      "steps": [
+        "의자에 앉아 발꿈치를 바닥에 붙입니다.",
+        "발끝을 최대한 위로 당겼다가 내립니다.",
+        "리듬감 있게 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 15,
+      "sets": 3,
+      "svgKey": "ankle-pump"
+    },
+    {
+      "id": "ankle-3",
+      "name": "까치발 서기",
+      "bodyPart": "발목",
+      "description": "종아리 근육과 발목 근력을 강화합니다.",
+      "steps": [
+        "벽 앞에 서서 손끝을 벽에 살짝 댑니다.",
+        "천천히 발꿈치를 들어 까치발을 합니다.",
+        "2초 유지 후 천천히 내립니다."
+      ],
+      "breathing": { "inhale": 2, "hold": 2, "exhale": 4 },
+      "reps": 15,
+      "sets": 3,
+      "svgKey": "ankle-raise"
+    },
+    {
+      "id": "hip-1",
+      "name": "고관절 굴곡 스트레칭",
+      "bodyPart": "고관절",
+      "description": "고관절 앞쪽 근육을 이완시킵니다.",
+      "steps": [
+        "한쪽 무릎을 바닥에 대고 런지 자세를 취합니다.",
+        "앞 무릎을 구부리며 골반을 천천히 앞으로 밀어줍니다.",
+        "20~30초 유지 후 반대쪽 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 3,
+      "sets": 2,
+      "svgKey": "hip-flexor"
+    },
+    {
+      "id": "hip-2",
+      "name": "조개 운동",
+      "bodyPart": "고관절",
+      "description": "고관절 외전근을 강화하는 운동입니다.",
+      "steps": [
+        "옆으로 누워 무릎을 약 45도 구부립니다.",
+        "발은 붙인 채로 위쪽 무릎을 천천히 들어올립니다.",
+        "2초 유지 후 천천히 내립니다. 반대쪽 반복."
+      ],
+      "breathing": { "inhale": 2, "hold": 2, "exhale": 4 },
+      "reps": 15,
+      "sets": 3,
+      "svgKey": "hip-clam"
+    },
+    {
+      "id": "elbow-1",
+      "name": "팔꿈치 굴곡/신전 운동",
+      "bodyPart": "팔꿈치",
+      "description": "팔꿈치 관절의 가동 범위를 유지합니다.",
+      "steps": [
+        "팔을 자연스럽게 몸 옆에 내립니다.",
+        "천천히 팔꿈치를 구부려 손이 어깨에 닿도록 합니다.",
+        "천천히 다시 펴줍니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 3,
+      "svgKey": "elbow-flex"
+    },
+    {
+      "id": "elbow-2",
+      "name": "전완 회전 운동",
+      "bodyPart": "팔꿈치",
+      "description": "팔꿈치 회전 근육을 강화합니다.",
+      "steps": [
+        "팔꿈치를 90도로 구부려 옆구리에 붙입니다.",
+        "손바닥이 위를 향하도록 천천히 회전합니다.",
+        "다시 손바닥이 아래를 향하도록 회전합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 3,
+      "svgKey": "elbow-rotation"
+    },
+    {
+      "id": "wrist-1",
+      "name": "손목 굴곡/신전 스트레칭",
+      "bodyPart": "손목",
+      "description": "손목 관절의 유연성을 개선합니다.",
+      "steps": [
+        "팔을 앞으로 뻗습니다.",
+        "반대 손으로 손가락을 잡아 손목을 위쪽으로 젖힙니다.",
+        "15초 유지 후 아래쪽으로도 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 2, "exhale": 6 },
+      "reps": 3,
+      "sets": 2,
+      "svgKey": "wrist-flex"
+    },
+    {
+      "id": "wrist-2",
+      "name": "손목 돌리기",
+      "bodyPart": "손목",
+      "description": "손목 관절의 가동 범위를 회복합니다.",
+      "steps": [
+        "양손을 앞으로 뻗거나 무릎 위에 올립니다.",
+        "손목을 시계 방향으로 천천히 크게 돌립니다.",
+        "10회 후 반시계 방향으로 반복합니다."
+      ],
+      "breathing": { "inhale": 4, "hold": 0, "exhale": 4 },
+      "reps": 10,
+      "sets": 2,
+      "svgKey": "wrist-circle"
+    }
+  ]
+}
