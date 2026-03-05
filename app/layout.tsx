@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "운동 처방 가이드",
+  title: "Physio Guide",
   description: "물리치료사가 제공하는 맞춤 운동 가이드",
 };
 

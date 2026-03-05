@@ -40,7 +40,7 @@ export default function HomePage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🏥</div>
-          <h1 className="text-3xl font-bold text-slate-800">운동 처방 가이드</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Physio Guide</h1>
           <p className="text-slate-500 mt-2">불편한 부위를 선택하면<br />맞춤 운동을 안내해 드려요.</p>
         </div>
 
