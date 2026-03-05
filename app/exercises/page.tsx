@@ -45,7 +45,7 @@ function ExerciseList() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {exercises.map((ex) => (
             <Link key={ex.id} href={`/exercise/${ex.id}`}>
               <div className="bg-white rounded-2xl shadow p-4 flex items-center gap-4 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer">
