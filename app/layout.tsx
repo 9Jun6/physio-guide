@@ -6,6 +6,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Physio Guide",
   description: "물리치료사가 제공하는 맞춤 운동 가이드",
+  openGraph: {
+    title: "Physio Guide",
+    description: "물리치료사가 제공하는 맞춤 운동 가이드",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
