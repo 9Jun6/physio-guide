@@ -16,16 +16,20 @@ const svgMap: Record<string, ReactElement> = {
     <svg viewBox="0 0 200 210" className="w-full h-full" fill="none">
       <style>{`
         @keyframes neck-tilt {
-          0%, 15% { transform: rotate(0deg); transform-origin: 100px 104px; }
-          45%, 70% { transform: rotate(15deg); transform-origin: 100px 104px; }
-          100% { transform: rotate(0deg); transform-origin: 100px 104px; }
+          0%, 15% { transform: rotate(0deg); }
+          45%, 70% { transform: rotate(15deg); }
+          100% { transform: rotate(0deg); }
         }
         @keyframes pulse-stretch {
           0%, 20% { opacity: 0; }
           50%, 75% { opacity: 1; }
           100% { opacity: 0; }
         }
-        .head-group { animation: neck-tilt 3.5s ease-in-out infinite; }
+        .head-group { 
+          animation: neck-tilt 3.5s ease-in-out infinite;
+          transform-origin: 100px 104px;
+          transform-box: fill-box;
+        }
         .stretch-highlight { animation: pulse-stretch 3.5s ease-in-out infinite; }
       `}</style>
       {/* 상체 (고정) */}
