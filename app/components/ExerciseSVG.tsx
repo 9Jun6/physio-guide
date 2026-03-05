@@ -14,23 +14,46 @@ const svgMap: Record<string, ReactElement> = {
 
   "neck-side": (
     <svg viewBox="0 0 200 210" className="w-full h-full" fill="none">
-      {/* 상체 */}
+      <style>{`
+        @keyframes neck-tilt {
+          0%, 15% { transform: rotate(0deg); transform-origin: 100px 104px; }
+          45%, 70% { transform: rotate(15deg); transform-origin: 100px 104px; }
+          100% { transform: rotate(0deg); transform-origin: 100px 104px; }
+        }
+        @keyframes pulse-stretch {
+          0%, 20% { opacity: 0; }
+          50%, 75% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .head-group { animation: neck-tilt 3.5s ease-in-out infinite; }
+        .stretch-highlight { animation: pulse-stretch 3.5s ease-in-out infinite; }
+      `}</style>
+      {/* 상체 (고정) */}
       <line x1="58" y1="118" x2="142" y2="118" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
       <line x1="100" y1="104" x2="100" y2="172" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
       <line x1="58" y1="118" x2="40" y2="160" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
       <line x1="142" y1="118" x2="160" y2="160" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* 관절 */}
-      <circle cx="40" cy="160" r="3" fill={B}/>
-      <circle cx="160" cy="160" r="3" fill={B}/>
-      {/* 목 (오른쪽으로 기울어짐) */}
-      <line x1="114" y1="82" x2="100" y2="104" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* 머리 - 오른쪽 기울기 */}
-      <circle cx="120" cy="62" r="21" stroke={B} strokeWidth="2.5" fill="white"/>
-      {/* 오른쪽 목 스트레칭 강조선 */}
-      <path d="M100 104 Q92 93 102 80" stroke={H} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="5 3"/>
-      {/* 방향 화살표 */}
-      <path d="M150 44 Q166 66 155 88" stroke={A} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <path d="M149 86 L155 92 L161 85" stroke={A} strokeWidth="2" fill="none" strokeLinecap="round"/>
+      
+      {/* 가이드 (시작 위치 고스트 라인) */}
+      <g opacity="0.2">
+        <line x1="100" y1="104" x2="100" y2="82" stroke={B} strokeWidth="2" strokeDasharray="3 2"/>
+        <circle cx="100" cy="62" r="21" stroke={B} strokeWidth="2" strokeDasharray="3 2"/>
+      </g>
+
+      {/* 움직이는 머리와 목 */}
+      <g className="head-group">
+        <line x1="100" y1="104" x2="100" y2="82" stroke={B} strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="100" cy="62" r="21" stroke={B} strokeWidth="2.5" fill="white"/>
+        {/* 코 방향 표시 (오른쪽으로 기울어짐을 더 명확하게) */}
+        <path d="M112 62 L118 64 L112 66" stroke={B} strokeWidth="1.5" fill="none"/>
+      </g>
+
+      {/* 왼쪽 목 스트레칭 강조 (목이 기울어질 때 나타남) */}
+      <path className="stretch-highlight" d="M92 100 Q84 88 92 76" stroke={H} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="5 3"/>
+
+      {/* 방향 화살표 (고정 가이드) */}
+      <path d="M140 44 Q156 66 145 88" stroke={A} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M141 86 L145 92 L151 85" stroke={A} strokeWidth="2" fill="none" strokeLinecap="round"/>
     </svg>
   ),
 
