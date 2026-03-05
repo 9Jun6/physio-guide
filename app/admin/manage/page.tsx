@@ -224,7 +224,11 @@ export default function AdminManagePage() {
         </div>
 
         {msg && (
-          <div className="mb-4 px-4 py-2 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200">
+          <div className={`mb-4 px-4 py-2 rounded-xl text-sm font-medium border ${
+            msg.startsWith("오류:")
+              ? "bg-red-50 text-red-700 border-red-200"
+              : "bg-green-50 text-green-700 border-green-200"
+          }`}>
             {msg}
           </div>
         )}
