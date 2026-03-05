@@ -155,25 +155,68 @@ const svgMap: Record<string, ReactElement> = {
 
   "back-knee-chest": (
     <svg viewBox="0 0 200 175" className="w-full h-full" fill="none">
-      {/* 바닥 */}
-      <line x1="8" y1="155" x2="192" y2="155" stroke="#CBD5E1" strokeWidth="2.5"/>
-      {/* 누운 몸통 */}
-      <line x1="32" y1="132" x2="128" y2="132" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* 머리 */}
-      <circle cx="18" cy="120" r="17" stroke={B} strokeWidth="2.5" fill="white"/>
-      <line x1="30" y1="126" x2="35" y2="132" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* 양 다리 - 무릎 구부려 가슴으로 */}
-      <line x1="122" y1="132" x2="148" y2="105" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="148" cy="105" r="4" stroke={H} strokeWidth="2" fill={HF}/>
-      <line x1="148" y1="105" x2="130" y2="83" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="128" y1="136" x2="156" y2="110" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="156" cy="110" r="4" stroke={H} strokeWidth="2" fill={HF}/>
-      <line x1="156" y1="110" x2="138" y2="88" stroke={B} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* 손 - 무릎 감싸기 */}
-      <path d="M58 128 Q90 100 130 84" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <path d="M58 136 Q90 110 138 90" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round" strokeDasharray="4 2"/>
-      {/* 허리 강조 */}
-      <path d="M78 132 Q103 127 122 132" stroke={H} strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* 매트 */}
+      <rect x="8" y="152" width="184" height="5" rx="2.5" fill="#E2E8F0"/>
+
+      {/* ── 머리 (측면, 누운 자세) ── */}
+      <ellipse cx="22" cy="114" rx="13" ry="12" stroke={B} strokeWidth="2" fill="white"/>
+      {/* 머리카락 호 */}
+      <path d="M10 109 C13 101 31 101 34 109" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* 귀 */}
+      <path d="M33 113 C36 111 36 118 33 117" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* 턱선 */}
+      <path d="M22 126 C25 128 30 127 33 123" stroke={B} strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+
+      {/* ── 목 ── */}
+      <path d="M32 121 C36 126 39 128 42 129" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+
+      {/* ── 몸통 윤곽 (이중선으로 입체감) ── */}
+      {/* 몸통 앞면(위) — 가슴·배 곡선 */}
+      <path d="M42 129 C62 124 90 124 116 128" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* 몸통 뒷면(아래) — 등·매트 쪽 */}
+      <path d="M42 134 C66 136 92 136 116 133" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+      {/* 어깨 마감 곡선 */}
+      <path d="M42 129 C40 131 40 133 42 134" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+      {/* 고관절 마감 곡선 (둔부 힌트) */}
+      <path d="M116 128 C120 128 121 131 118 134" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+
+      {/* ── 앞쪽 다리 (근경) ── */}
+      {/* 허벅지 — 고관절 → 무릎 */}
+      <path d="M116 130 C126 127 138 114 150 100" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* 허벅지 뒤쪽 선 */}
+      <path d="M118 133 C129 132 142 119 153 105" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      {/* 무릎 연결 */}
+      <path d="M150 100 C151 102 153 104 153 105" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      {/* 정강이 — 무릎 → 발 */}
+      <path d="M150 100 C148 91 141 84 133 78" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M153 105 C151 96 144 89 136 83" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      {/* 발 */}
+      <path d="M133 78 C129 74 123 76 120 81" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      <path d="M136 83 C132 80 126 81 123 85" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+
+      {/* ── 뒤쪽 다리 (원경) ── */}
+      {/* 허벅지 */}
+      <path d="M115 133 C128 134 141 121 154 108" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="6 2"/>
+      {/* 정강이 */}
+      <path d="M154 108 C152 99 145 92 138 87" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="6 2"/>
+      {/* 발 */}
+      <path d="M138 87 C134 83 129 85 127 89" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeDasharray="4 2"/>
+
+      {/* ── 무릎 강조 ── */}
+      <circle cx="151" cy="102" r="5.5" stroke={H} strokeWidth="2" fill={HF}/>
+      <circle cx="154" cy="108" r="4.5" stroke={H} strokeWidth="1.8" fill={HF}/>
+
+      {/* ── 앞쪽 팔 — 무릎을 감싸 정강이를 잡음 ── */}
+      <path d="M58 130 C80 122 108 106 134 80" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+      {/* 손 (정강이 감싸는 커브) */}
+      <path d="M134 80 C138 76 143 78 140 85" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+
+      {/* ── 뒤쪽 팔 (원경, 점선) ── */}
+      <path d="M58 127 C82 118 110 103 137 88" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="5 3"/>
+      <path d="M137 88 C141 85 145 87 143 93" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeDasharray="4 2"/>
+
+      {/* ── 허리 강조 ── */}
+      <path d="M82 133 C96 128 108 128 116 131" stroke={H} strokeWidth="3" fill="none" strokeLinecap="round"/>
     </svg>
   ),
 
