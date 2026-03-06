@@ -50,11 +50,15 @@ export default function AdminLoginPage() {
         if (loginErr) throw loginErr;
       } else {
         // 2. 회원가입 (치료사 전용)
+        // role 정보를 메타데이터에 담아 보냅니다. DB 트리거가 이를 감지해 프로필을 생성합니다.
         const { data: authData, error: signupErr } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: fullName }
+            data: { 
+              full_name: fullName,
+              role: "therapist" // 트리거에서 참조할 역할 정보
+            }
           }
         });
         
@@ -62,22 +66,6 @@ export default function AdminLoginPage() {
           throw new Error(`회원가입 실패: ${signupErr.message}`);
         }
 
-        if (authData.user) {
-          // profiles 테이블에 치료사로 등록
-          const { error: profileErr } = await supabase
-            .from("profiles")
-            .upsert([{ // insert 대신 upsert 사용으로 안정성 확보
-              id: authData.user.id,
-              role: "therapist",
-              full_name: fullName,
-              email: email
-            }]);
-          
-          if (profileErr) {
-            console.error("Profile creation error:", profileErr);
-            throw new Error(`프로필 생성 실패: ${profileErr.message}`);
-          }
-        }
         alert("회원가입이 성공했습니다! 이제 로그인해 주세요.");
         setIsLogin(true);
         setLoading(false);
