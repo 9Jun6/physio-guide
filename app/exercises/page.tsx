@@ -22,7 +22,7 @@ function ExerciseList() {
     fetch("/api/exercises")
       .then((r) => r.json())
       .then((data: ExercisesData) => {
-        setExercises(data.exercises.filter((e) => e.bodyPart === part));
+        setExercises(data.exercises.filter((e) => e.body_part === part));
         setLoading(false);
       });
   }, [part, router]);
@@ -50,14 +50,14 @@ function ExerciseList() {
             <Link key={ex.id} href={`/exercise/${ex.id}`}>
               <div className="bg-white rounded-2xl shadow p-4 flex items-center gap-4 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer">
                 <div className="w-20 h-20 flex-shrink-0 overflow-hidden">
-                  <ExerciseSVG svgKey={ex.svgKey} />
+                  <ExerciseSVG svgKey={ex.svg_key} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-slate-800">{ex.name}</h2>
                   <p className="text-slate-500 text-sm mt-1 line-clamp-2">{ex.description}</p>
                   <div className="flex gap-2 mt-2">
-                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{ex.reps}회</span>
-                    <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{ex.sets}세트</span>
+                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{ex.default_reps}회</span>
+                    <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{ex.default_sets}세트</span>
                   </div>
                 </div>
                 <span className="text-slate-300 text-xl">›</span>
