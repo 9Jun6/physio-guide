@@ -5,11 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { Exercise, ExercisesData } from "../../types";
-import ExerciseSVG from "../../components/ExerciseSVG";
 import BreathingTimer from "../../components/BreathingTimer";
-import dynamic from "next/dynamic";
-
-const KneeChest3D = dynamic(() => import("../../components/KneeChest3D"), { ssr: false });
 
 function ExerciseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -56,15 +52,6 @@ function ExerciseDetail() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-lg p-6 space-y-6">
-          {/* 운동 일러스트 */}
-          <div className="bg-slate-50 rounded-2xl p-4 flex justify-center">
-            {exercise.id === "back-1" ? (
-              <KneeChest3D />
-            ) : (
-              <ExerciseSVG svgKey={exercise.svgKey} className="w-52 h-52" />
-            )}
-          </div>
-
           {/* 설명 */}
           <div>
             <p className="text-slate-600 leading-relaxed">{exercise.description}</p>
