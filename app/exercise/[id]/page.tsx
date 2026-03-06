@@ -5,13 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { Exercise, ExercisesData } from "../../types";
-import ExerciseSVG from "../../components/ExerciseSVG";
-import FramePlayer from "../../components/FramePlayer";
 import BreathingTimer from "../../components/BreathingTimer";
-
-const ANIMATED_EXERCISES: Record<string, string[]> = {
-  "back-1": ["back-knee-chest-f1", "back-knee-chest-f2", "back-knee-chest-f3"],
-};
 
 function ExerciseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -58,15 +52,6 @@ function ExerciseDetail() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-lg p-6 space-y-6">
-          {/* SVG 일러스트 */}
-          <div className="bg-slate-50 rounded-2xl p-4 flex justify-center">
-            {ANIMATED_EXERCISES[exercise.id] ? (
-              <FramePlayer frames={ANIMATED_EXERCISES[exercise.id]} />
-            ) : (
-              <ExerciseSVG svgKey={exercise.svgKey} className="w-52 h-52" />
-            )}
-          </div>
-
           {/* 설명 */}
           <div>
             <p className="text-slate-600 leading-relaxed">{exercise.description}</p>

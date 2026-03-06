@@ -87,6 +87,9 @@ export default function BreathingTimer({
     let rep = 1;
     let set = 1;
     let stepIdx = 0;
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     setPhase(sequence[0].phase);
     setCountdown(timeLeft);
@@ -95,14 +98,13 @@ export default function BreathingTimer({
     setCurrentSet(1);
     setCurrentStepIdx(0);
 
-    const tick = setInterval(() => {
-      timeLeft -= 1;
+    function advancePhase() {
+      // 프로그레스바 100% → 1.5초 대기 → 다음 페이즈
+      setProgress(100);
+      setCountdown(0);
+      timeoutId = setTimeout(() => {
+        if (cancelled) return;
 
-      const elapsed = sequence[seqIdx].duration - timeLeft;
-      setProgress((elapsed / sequence[seqIdx].duration) * 100);
-      setCountdown(timeLeft);
-
-      if (timeLeft <= 0) {
         seqIdx++;
 
         if (seqIdx >= sequence.length) {
@@ -118,7 +120,6 @@ export default function BreathingTimer({
             if (rep > reps) {
               // 모든 회 완료 = 1세트 완료
               if (set >= sets) {
-                clearInterval(tick);
                 setRunning(false);
                 setDone(true);
                 setPhase("ready");
@@ -135,14 +136,36 @@ export default function BreathingTimer({
           setCurrentStepIdx(stepIdx);
         }
 
-        setPhase(sequence[seqIdx].phase);
         timeLeft = sequence[seqIdx].duration;
+        setPhase(sequence[seqIdx].phase);
         setCountdown(timeLeft);
         setProgress(0);
-      }
-    }, 1000);
+        startPhase();
+      }, 1500);
+    }
 
-    return () => clearInterval(tick);
+    function startPhase() {
+      intervalId = setInterval(() => {
+        timeLeft -= 1;
+
+        if (timeLeft <= 0) {
+          clearInterval(intervalId!);
+          intervalId = null;
+          advancePhase();
+        } else {
+          setProgress(((sequence[seqIdx].duration - timeLeft) / sequence[seqIdx].duration) * 100);
+          setCountdown(timeLeft);
+        }
+      }, 1000);
+    }
+
+    startPhase();
+
+    return () => {
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
