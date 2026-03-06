@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { Exercise, ExercisesData } from "../types";
-import ExerciseSVG from "../components/ExerciseSVG";
 
 function ExerciseList() {
   const router = useRouter();
@@ -49,9 +48,6 @@ function ExerciseList() {
           {exercises.map((ex) => (
             <Link key={ex.id} href={`/exercise/${ex.id}`}>
               <div className="bg-white rounded-2xl shadow p-4 flex items-center gap-4 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer">
-                <div className="w-20 h-20 flex-shrink-0 overflow-hidden">
-                  <ExerciseSVG svgKey={ex.svgKey} />
-                </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-slate-800">{ex.name}</h2>
                   <p className="text-slate-500 text-sm mt-1 line-clamp-2">{ex.description}</p>
