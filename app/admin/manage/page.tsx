@@ -25,15 +25,27 @@ interface Prescription {
   notes: string;
   exerciseIds: string[];
   createdAt: string;
+  therapistId?: string;
+}
+
+interface Therapist {
+  id: string;
+  name: string;
+  role: "admin" | "therapist";
+  createdAt: string;
 }
 
 function generateToken() {
-  return Math.random().toString(36).slice(2, 10);
+  return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
 }
 
 export default function AdminManagePage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"exercises" | "prescriptions">("exercises");
+  const [tab, setTab] = useState<"exercises" | "prescriptions" | "accounts">("exercises");
+
+  // Current user info (from first load)
+  const [myName, setMyName] = useState("");
+  const [myRole, setMyRole] = useState<"admin" | "therapist">("therapist");
 
   // Exercise state
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -48,18 +60,49 @@ export default function AdminManagePage() {
   const [prescForm, setPrescForm] = useState({ patientName: "", notes: "", exerciseIds: [] as string[] });
   const [qrTarget, setQrTarget] = useState<Prescription | null>(null);
 
+  // Account management state (admin only)
+  const [therapists, setTherapists] = useState<Therapist[]>([]);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [accountForm, setAccountForm] = useState({ id: "", name: "", password: "", role: "therapist" as "admin" | "therapist" });
+
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const adminPassword =
-    typeof window !== "undefined" ? sessionStorage.getItem("adminPassword") ?? "" : "";
-
   useEffect(() => {
-    if (!adminPassword) { router.push("/admin"); return; }
-    loadExercises();
-    loadPrescriptions();
+    // Verify session by loading prescriptions; if 401 → redirect to login
+    loadInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadInitialData = async () => {
+    const [exRes, prescRes] = await Promise.all([
+      fetch("/api/exercises"),
+      fetch("/api/prescriptions"),
+    ]);
+
+    if (prescRes.status === 401) {
+      router.push("/admin");
+      return;
+    }
+
+    const exData: ExercisesData = await exRes.json();
+    setExercises(exData.exercises);
+
+    const prescData = await prescRes.json();
+    if (prescData.prescriptions) setPrescriptions(prescData.prescriptions);
+
+    // Extract name/role from cookie (JWT is httpOnly, so we call a lightweight endpoint)
+    // We piggyback on the prescriptions response — instead, we'll call a /api/auth/me
+    // For now read from a meta header approach: just load therapists if admin
+    // Actually we need to know role. Let's add a /api/auth/me endpoint.
+    // Instead, let's check if therapists API succeeds to determine role.
+    const tRes = await fetch("/api/admin/therapists");
+    if (tRes.ok) {
+      setMyRole("admin");
+      const tData = await tRes.json();
+      setTherapists(tData.therapists);
+    }
+  };
 
   const loadExercises = () =>
     fetch("/api/exercises")
@@ -67,11 +110,23 @@ export default function AdminManagePage() {
       .then((data: ExercisesData) => setExercises(data.exercises));
 
   const loadPrescriptions = () =>
-    fetch(`/api/prescriptions?adminPassword=${encodeURIComponent(adminPassword)}`)
+    fetch("/api/prescriptions")
       .then((r) => r.json())
       .then((data) => {
         if (data.prescriptions) setPrescriptions(data.prescriptions);
       });
+
+  const loadTherapists = () =>
+    fetch("/api/admin/therapists")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.therapists) setTherapists(data.therapists);
+      });
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/admin");
+  };
 
   // Exercise API
   const apiCall = async (action: string, exercise: Partial<Exercise>) => {
@@ -79,7 +134,7 @@ export default function AdminManagePage() {
     const res = await fetch("/api/exercises", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminPassword, action, exercise }),
+      body: JSON.stringify({ action, exercise }),
     });
     setSaving(false);
     if (!res.ok) {
@@ -139,7 +194,7 @@ export default function AdminManagePage() {
     const res = await fetch("/api/prescriptions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminPassword, action, prescription }),
+      body: JSON.stringify({ action, prescription }),
     });
     setSaving(false);
     if (!res.ok) {
@@ -189,14 +244,54 @@ export default function AdminManagePage() {
       ? `${window.location.origin}/p/${p.token}`
       : `/p/${p.token}`;
 
+  // Account management
+  const handleAccountAdd = async () => {
+    if (!accountForm.id || !accountForm.name || !accountForm.password) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/therapists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add", ...accountForm }),
+    });
+    setSaving(false);
+    if (!res.ok) {
+      const err = await res.json();
+      setMsg(`오류: ${err.error}`);
+      return;
+    }
+    setAccountModalOpen(false);
+    setAccountForm({ id: "", name: "", password: "", role: "therapist" });
+    setMsg("계정이 추가되었습니다.");
+    await loadTherapists();
+  };
+
+  const handleAccountDelete = async (t: Therapist) => {
+    if (!confirm(`"${t.name}" 계정을 삭제할까요?`)) return;
+    const res = await fetch("/api/admin/therapists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "delete", id: t.id }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      setMsg(`오류: ${err.error}`);
+      return;
+    }
+    setMsg("삭제되었습니다.");
+    await loadTherapists();
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">관리자</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">관리자</h1>
+            {myName && <p className="text-xs text-slate-400 mt-0.5">{myName}</p>}
+          </div>
           <button
-            onClick={() => { sessionStorage.removeItem("adminPassword"); router.push("/admin"); }}
+            onClick={handleLogout}
             className="px-4 py-2 rounded-xl bg-slate-200 text-slate-600 font-semibold hover:bg-slate-300 active:scale-95 transition-all"
           >
             로그아웃
@@ -221,6 +316,16 @@ export default function AdminManagePage() {
           >
             처방전 관리
           </button>
+          {myRole === "admin" && (
+            <button
+              onClick={() => { setTab("accounts"); setMsg(""); }}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                tab === "accounts" ? "bg-white text-slate-800 shadow" : "text-slate-500"
+              }`}
+            >
+              계정 관리
+            </button>
+          )}
         </div>
 
         {msg && (
@@ -358,6 +463,50 @@ export default function AdminManagePage() {
                       </button>
                     </div>
                   </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ───── 계정 관리 탭 (admin only) ───── */}
+        {tab === "accounts" && myRole === "admin" && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-slate-500 text-sm">총 {therapists.length}명</p>
+              <button
+                onClick={() => { setAccountModalOpen(true); setAccountForm({ id: "", name: "", password: "", role: "therapist" }); setMsg(""); }}
+                className="px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 active:scale-95 transition-all"
+              >
+                + 계정 추가
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {therapists.map((t) => (
+                <div key={t.id} className="bg-white rounded-2xl shadow p-4 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        t.role === "admin"
+                          ? "bg-purple-50 text-purple-600"
+                          : "bg-blue-50 text-blue-600"
+                      }`}>
+                        {t.role === "admin" ? "관리자" : "치료사"}
+                      </span>
+                      <span className="font-bold text-slate-800">{t.name}</span>
+                      <span className="text-slate-400 text-sm">@{t.id}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">
+                      가입일 {new Date(t.createdAt).toLocaleDateString("ko-KR")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleAccountDelete(t)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-colors"
+                  >
+                    삭제
+                  </button>
                 </div>
               ))}
             </div>
@@ -567,6 +716,73 @@ export default function AdminManagePage() {
                 className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-40 active:scale-95 transition-all"
               >
                 {saving ? "저장 중..." : "처방 생성"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───── 계정 추가 모달 ───── */}
+      {accountModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 px-4 py-6">
+          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4">
+            <h2 className="text-xl font-bold text-slate-800">새 계정 추가</h2>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-slate-600">아이디</label>
+                <input
+                  className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
+                  placeholder="예: kim123"
+                  value={accountForm.id}
+                  onChange={(e) => setAccountForm({ ...accountForm, id: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-600">이름</label>
+                <input
+                  className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
+                  placeholder="예: 김치료사"
+                  value={accountForm.name}
+                  onChange={(e) => setAccountForm({ ...accountForm, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-600">비밀번호</label>
+                <input
+                  type="password"
+                  className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
+                  placeholder="6자 이상"
+                  value={accountForm.password}
+                  onChange={(e) => setAccountForm({ ...accountForm, password: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-600">권한</label>
+                <select
+                  className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800 bg-white"
+                  value={accountForm.role}
+                  onChange={(e) => setAccountForm({ ...accountForm, role: e.target.value as "admin" | "therapist" })}
+                >
+                  <option value="therapist">치료사</option>
+                  <option value="admin">관리자</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setAccountModalOpen(false)}
+                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-semibold hover:bg-slate-200 active:scale-95 transition-all"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleAccountAdd}
+                disabled={saving || !accountForm.id || !accountForm.name || !accountForm.password}
+                className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-40 active:scale-95 transition-all"
+              >
+                {saving ? "추가 중..." : "추가"}
               </button>
             </div>
           </div>

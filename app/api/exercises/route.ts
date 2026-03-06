@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readExercises, writeExercises } from "@/lib/storage";
+import { getAuth } from "@/lib/auth";
 
 export async function GET() {
   const data = await readExercises();
@@ -7,12 +8,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { adminPassword, action, exercise } = body;
-
-  if (adminPassword !== process.env.ADMIN_PASSWORD) {
+  const auth = await getAuth(req);
+  if (!auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const body = await req.json();
+  const { action, exercise } = body;
 
   const data = await readExercises();
 

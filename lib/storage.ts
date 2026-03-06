@@ -33,6 +33,37 @@ export async function writePrescriptions(data: unknown): Promise<void> {
   writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
 }
 
+// ─── Therapists ──────────────────────────────────────────────────
+
+export interface Therapist {
+  id: string;
+  name: string;
+  passwordHash: string;
+  role: "admin" | "therapist";
+  createdAt: string;
+}
+
+export async function readTherapists(): Promise<{ therapists: Therapist[] }> {
+  if (useKV) {
+    const { kv } = await import("@vercel/kv");
+    return (await kv.get<{ therapists: Therapist[] }>("therapists")) ?? { therapists: [] };
+  }
+  const { readFileSync } = await import("fs");
+  const dataPath = path.join(process.cwd(), "data", "therapists.json");
+  return JSON.parse(readFileSync(dataPath, "utf-8"));
+}
+
+export async function writeTherapists(data: { therapists: Therapist[] }): Promise<void> {
+  if (useKV) {
+    const { kv } = await import("@vercel/kv");
+    await kv.set("therapists", data);
+    return;
+  }
+  const { writeFileSync } = await import("fs");
+  const dataPath = path.join(process.cwd(), "data", "therapists.json");
+  writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+}
+
 // ─── Exercises ───────────────────────────────────────────────────
 
 export async function readExercises(): Promise<{ bodyParts: string[]; exercises: unknown[] }> {
