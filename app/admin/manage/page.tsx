@@ -6,8 +6,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { createClient } from "@/lib/supabase";
-import { Exercise, Prescription } from "../../types";
+import { Exercise, Prescription, ExerciseLog } from "../../types";
 import * as actions from "../actions";
+import { TabNav, ExerciseCard, PrescriptionCard, LogCard, AdminModal } from "./components";
 
 const BODY_PARTS = ["목", "어깨", "허리", "무릎", "발목", "고관절", "팔꿈치", "손목"];
 
@@ -22,22 +23,24 @@ const emptyExercise = (): Omit<Exercise, "id"> => ({
   svg_key: "",
 });
 
+type TabType = "exercises" | "prescriptions" | "logs";
+
 export default function AdminManagePage() {
   const router = useRouter();
   const supabase = createClient();
   
-  const [tab, setTab] = useState<"exercises" | "prescriptions" | "logs">("exercises");
+  const [tab, setTab] = useState<TabType>("exercises");
   const [userRole, setUserRole] = useState<string | null>(null);
 
   // States
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<ExerciseLog[]>([]);
   
   const [filterPart, setFilterPart] = useState("전체");
   const [editTarget, setEditTarget] = useState<Exercise | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState<Omit<Exercise, "id">>(emptyExercise());
+  const [exerciseForm, setExerciseForm] = useState<Omit<Exercise, "id"> | Exercise>(emptyExercise());
 
   const [prescModalOpen, setPrescModalOpen] = useState(false);
   const [prescForm, setPrescForm] = useState({ patientName: "", notes: "", exerciseIds: [] as string[] });
@@ -63,7 +66,7 @@ export default function AdminManagePage() {
 
       setExercises(exs as Exercise[]);
       setPrescriptions(prescs as Prescription[]);
-      setLogs(lg);
+      setLogs(lg as ExerciseLog[]);
     } catch (e: any) {
       setMsg(`오류: ${e.message}`);
     } finally {
@@ -80,12 +83,12 @@ export default function AdminManagePage() {
     router.push("/admin");
   };
 
-  // Exercise Actions
-  const handleSave = async () => {
+  // ───── Exercise Actions ─────
+  const handleSaveExercise = async () => {
     if (!editTarget) return;
     setSaving(true);
     try {
-      const exerciseData = { ...form, id: isNew ? undefined : editTarget.id };
+      const exerciseData = { ...exerciseForm, id: isNew ? undefined : editTarget.id };
       await actions.saveExerciseAction(exerciseData);
       setMsg(isNew ? "운동이 추가되었습니다." : "수정되었습니다.");
       setEditTarget(null);
@@ -97,22 +100,19 @@ export default function AdminManagePage() {
     }
   };
 
-  const handleDelete = async (ex: Exercise) => {
+  const handleDeleteExercise = async (ex: Exercise) => {
     if (!confirm(`"${ex.name}"을(를) 삭제할까요?`)) return;
-    setSaving(true);
     try {
       await actions.deleteExerciseAction(ex.id);
       setMsg("삭제되었습니다.");
       loadData();
     } catch (e: any) {
       setMsg(`오류: ${e.message}`);
-    } finally {
-      setSaving(false);
     }
   };
 
-  // Prescription Actions
-  const handlePrescSave = async () => {
+  // ───── Prescription Actions ─────
+  const handleSavePrescription = async () => {
     if (!prescForm.patientName || prescForm.exerciseIds.length === 0) return;
     setSaving(true);
     try {
@@ -128,178 +128,196 @@ export default function AdminManagePage() {
     }
   };
 
-  const handlePrescDelete = async (p: Prescription) => {
+  const handleDeletePrescription = async (p: Prescription) => {
     if (!confirm(`"${p.patient_name_input}"의 처방전을 삭제할까요?`)) return;
-    setSaving(true);
     try {
       await actions.deletePrescriptionAction(p.id);
       setMsg("삭제되었습니다.");
       loadData();
     } catch (e: any) {
       setMsg(`오류: ${e.message}`);
-    } finally {
-      setSaving(false);
     }
   };
 
-  const filtered =
-    filterPart === "전체" ? exercises : exercises.filter((e) => e.body_part === filterPart);
+  // ───── UI Helpers ─────
+  const filteredExercises = filterPart === "전체" ? exercises : exercises.filter((e) => e.body_part === filterPart);
 
-  const prescriptionUrl = (p: Prescription) =>
-    typeof window !== "undefined"
-      ? `${window.location.origin}/p/${p.id}`
-      : `/p/${p.id}`;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">
-        데이터 로딩 중...
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400 font-bold">
+      <div className="animate-pulse">PhysioGuide Loading...</div>
+    </div>
+  );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-10">
+    <main className="min-h-screen bg-slate-50 px-4 py-10 pb-20">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-8 px-2">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">관리자 대시보드</h1>
-            <p className="text-xs text-slate-400 font-medium">{userRole === 'admin' ? "사이트 관리자 모드" : "치료사 모드"}</p>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">대시보드</h1>
+            <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mt-1">
+              {userRole === 'admin' ? "System Admin" : "Professional Therapist"}
+            </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 rounded-xl bg-white text-slate-600 font-semibold border border-slate-200 hover:bg-slate-50 active:scale-95 transition-all shadow-sm"
-          >
+          <button onClick={handleLogout} className="px-4 py-2 rounded-xl bg-white text-slate-600 font-bold text-sm border border-slate-200 shadow-sm hover:bg-slate-50 active:scale-95 transition-all">
             로그아웃
           </button>
         </div>
 
-        <div className="flex gap-1 bg-slate-200 rounded-xl p-1 mb-6">
-          <button onClick={() => setTab("exercises")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "exercises" ? "bg-white text-slate-800 shadow" : "text-slate-500"}`}>운동 관리</button>
-          <button onClick={() => setTab("prescriptions")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "prescriptions" ? "bg-white text-slate-800 shadow" : "text-slate-500"}`}>처방전 관리</button>
-          <button onClick={() => setTab("logs")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "logs" ? "bg-white text-slate-800 shadow" : "text-slate-500"}`}>진행 현황</button>
-        </div>
+        <TabNav tab={tab} setTab={setTab} />
 
         {msg && (
-          <div className={`mb-4 px-4 py-2 rounded-xl text-sm font-medium border ${msg.startsWith("오류:") ? "bg-red-50 text-red-700 border-red-200" : "bg-green-50 text-green-700 border-green-200"}`}>
+          <div className={`mb-6 px-5 py-3 rounded-2xl text-sm font-bold border animate-in fade-in slide-in-from-top-2 ${
+            msg.startsWith("오류:") ? "bg-red-50 text-red-600 border-red-100" : "bg-green-50 text-green-600 border-green-100"
+          }`}>
             {msg}
           </div>
         )}
 
         {/* ───── 운동 관리 탭 ───── */}
         {tab === "exercises" && (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-slate-500 text-sm">총 {exercises.length}개</p>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Master Library ({exercises.length})</p>
               {userRole === "admin" && (
-                <button onClick={() => { setEditTarget({ id: "new" } as Exercise); setIsNew(true); setForm(emptyExercise()); }} className="px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 active:scale-95 transition-all">+ 추가</button>
+                <button 
+                  onClick={() => { setEditTarget({ id: "new" } as Exercise); setIsNew(true); setExerciseForm(emptyExercise()); }}
+                  className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 active:scale-95 transition-all"
+                >
+                  + 신규 등록
+                </button>
               )}
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+            
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
               {["전체", ...BODY_PARTS].map((p) => (
-                <button key={p} onClick={() => setFilterPart(p)} className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${filterPart === p ? "bg-blue-500 text-white" : "bg-white text-slate-600 border border-slate-200"}`}>{p}</button>
+                <button
+                  key={p}
+                  onClick={() => setFilterPart(p)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                    filterPart === p ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100" : "bg-white text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {p}
+                </button>
               ))}
             </div>
-            <div className="space-y-3">
-              {filtered.map((ex) => (
-                <div key={ex.id} className="bg-white rounded-2xl shadow p-4 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase">{ex.body_part}</span>
-                    <h3 className="font-bold text-slate-800 mt-1">{ex.name}</h3>
-                    <p className="text-xs text-slate-400">{ex.default_reps}회 × {ex.default_sets}세트</p>
-                  </div>
-                  {userRole === "admin" && (
-                    <div className="flex gap-2">
-                      <button onClick={() => { setEditTarget(ex); setIsNew(false); setForm({ ...ex }); }} className="px-3 py-1.5 rounded-lg bg-slate-50 text-slate-600 text-xs font-bold">수정</button>
-                      <button onClick={() => handleDelete(ex)} className="px-3 py-1.5 rounded-lg bg-slate-50 text-red-500 text-xs font-bold">삭제</button>
-                    </div>
-                  )}
-                </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {filteredExercises.map((ex) => (
+                <ExerciseCard 
+                  key={ex.id} 
+                  ex={ex} 
+                  userRole={userRole} 
+                  onEdit={(ex) => { setEditTarget(ex); setIsNew(false); setExerciseForm({ ...ex }); }} 
+                  onDelete={handleDeleteExercise} 
+                />
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {/* ───── 처방전 관리 탭 ───── */}
         {tab === "prescriptions" && (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-slate-500 text-sm">내 처방 {prescriptions.length}개</p>
-              <button onClick={() => { setPrescModalOpen(true); setPrescForm({ patientName: "", notes: "", exerciseIds: [] }); }} className="px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 active:scale-95 transition-all">+ 새 처방</button>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">My Prescriptions ({prescriptions.length})</p>
+              <button 
+                onClick={() => setPrescModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-100"
+              >
+                + 새 처방 발행
+              </button>
             </div>
-            <div className="space-y-3">
+            
+            <div className="grid grid-cols-1 gap-3">
+              {prescriptions.length === 0 && <p className="text-center py-20 text-slate-400 font-medium">아직 발행한 처방전이 없습니다.</p>}
               {prescriptions.map((p) => (
-                <div key={p.id} className="bg-white rounded-2xl shadow p-4 flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <span className="font-bold text-slate-800">{p.patient_name_input}</span>
-                    <p className="text-xs text-slate-400 mt-1">운동 {(p.items || []).length}개 &nbsp;·&nbsp; {new Date(p.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => setQrTarget(p)} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold">QR</button>
-                    <button onClick={() => handlePrescDelete(p)} className="px-3 py-1.5 rounded-lg bg-slate-50 text-red-500 text-xs font-bold">삭제</button>
-                  </div>
-                </div>
+                <PrescriptionCard key={p.id} p={p} onShowQR={setQrTarget} onDelete={handleDeletePrescription} />
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {/* ───── 진행 현황 탭 ───── */}
         {tab === "logs" && (
-          <div className="space-y-4">
-            {logs.length === 0 && <p className="text-center py-20 text-slate-400">데이터가 없습니다.</p>}
-            {logs.map((log) => {
-              const painDiff = log.pain_score_after - log.pain_score_before;
-              return (
-                <div key={log.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="font-bold text-slate-800">{log.prescription?.patient_name_input || "익명"}</span>
-                    <span className="text-slate-400 text-xs">{new Date(log.created_at).toLocaleString()}</span>
-                  </div>
-                  <div className="text-sm text-slate-600 mb-3">{log.exercise?.name} ({log.completed_reps}회 × {log.completed_sets}세트)</div>
-                  <div className="bg-slate-50 rounded-xl p-3 flex justify-between items-center text-center">
-                    <div><p className="text-[10px] text-slate-400 mb-1">전</p><p className="font-bold">{log.pain_score_before}</p></div>
-                    <div className="text-slate-300">→</div>
-                    <div><p className="text-[10px] text-slate-400 mb-1">후</p><p className="font-bold">{log.pain_score_after} {painDiff !== 0 && <span className={`text-[10px] ${painDiff < 0 ? "text-green-500" : "text-red-500"}`}>({painDiff > 0 ? "+" : ""}{painDiff})</span>}</p></div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="space-y-6">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest px-2 text-center">Recent Activities</p>
+            <div className="grid grid-cols-1 gap-4">
+              {logs.length === 0 && <p className="text-center py-20 text-slate-400 font-medium">수행 데이터가 없습니다.</p>}
+              {logs.map((log) => (
+                <LogCard key={log.id} log={log} />
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* ───── 모달: QR 코드 ───── */}
-      {qrTarget && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4" onClick={() => setQrTarget(null)}>
-          <div className="bg-white rounded-3xl p-8 max-w-xs w-full text-center" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-4">{qrTarget.patient_name_input}님 QR코드</h2>
-            <div className="flex justify-center mb-6"><QRCodeSVG value={prescriptionUrl(qrTarget)} size={200} /></div>
-            <button onClick={() => setQrTarget(null)} className="w-full py-3 rounded-xl bg-slate-100 text-slate-600 font-bold">닫기</button>
+      {/* ───── [모달] 운동 편집 ───── */}
+      {editTarget && (
+        <AdminModal title={isNew ? "신규 운동 등록" : "운동 정보 수정"} onClose={() => setEditTarget(null)}>
+          <div className="space-y-5 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase ml-1">운동 이름</label>
+                <input className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-100 font-bold" value={exerciseForm.name} onChange={(e) => setExerciseForm({ ...exerciseForm, name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase ml-1">부위</label>
+                <select className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-100 font-bold appearance-none" value={exerciseForm.body_part} onChange={(e) => setExerciseForm({ ...exerciseForm, body_part: e.target.value })}>
+                  {BODY_PARTS.map(p => <option key={p}>{p}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button onClick={() => setEditTarget(null)} className="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-500 font-bold">취소</button>
+              <button onClick={handleSaveExercise} disabled={saving} className="flex-1 py-4 rounded-2xl bg-slate-900 text-white font-bold disabled:opacity-50">{saving ? "저장 중..." : "확인"}</button>
+            </div>
           </div>
-        </div>
+        </AdminModal>
       )}
 
-      {/* ───── 모달: 새 처방 (간략화) ───── */}
+      {/* ───── [모달] 새 처방 발행 ───── */}
       {prescModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl p-6 space-y-4">
-            <h2 className="text-xl font-bold">새 처방전</h2>
-            <input className="w-full p-3 bg-slate-50 rounded-xl" placeholder="환자 이름" value={prescForm.patientName} onChange={(e) => setPrescForm({...prescForm, patientName: e.target.value})} />
-            <div className="max-h-60 overflow-y-auto space-y-2">
-              {exercises.map(ex => (
-                <label key={ex.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg">
-                  <input type="checkbox" checked={prescForm.exerciseIds.includes(ex.id)} onChange={() => setPrescForm(prev => ({ ...prev, exerciseIds: prev.exerciseIds.includes(ex.id) ? prev.exerciseIds.filter(id => id !== ex.id) : [...prev.exerciseIds, ex.id] }))} />
-                  <span className="text-sm">{ex.name}</span>
-                </label>
-              ))}
+        <AdminModal title="새 처방전 발행" onClose={() => setPrescModalOpen(false)}>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 uppercase ml-1">환자 성함</label>
+              <input className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-100 font-bold" placeholder="홍길동" value={prescForm.patientName} onChange={(e) => setPrescForm({...prescForm, patientName: e.target.value})} />
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setPrescModalOpen(false)} className="flex-1 py-3 rounded-xl bg-slate-100">취소</button>
-              <button onClick={handlePrescSave} disabled={saving} className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-bold">생성</button>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 uppercase ml-1">운동 선택 ({prescForm.exerciseIds.length})</label>
+              <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                {exercises.map(ex => (
+                  <label key={ex.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 cursor-pointer transition-colors group">
+                    <input type="checkbox" className="w-5 h-5 accent-blue-600 rounded-lg" checked={prescForm.exerciseIds.includes(ex.id)} onChange={() => setPrescForm(prev => ({ ...prev, exerciseIds: prev.exerciseIds.includes(ex.id) ? prev.exerciseIds.filter(id => id !== ex.id) : [...prev.exerciseIds, ex.id] }))} />
+                    <span className="text-sm font-bold text-slate-700 group-hover:text-blue-700">{ex.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setPrescModalOpen(false)} className="flex-1 py-4 rounded-2xl bg-slate-100 text-slate-500 font-bold">취소</button>
+              <button onClick={handleSavePrescription} disabled={saving || !prescForm.patientName || prescForm.exerciseIds.length === 0} className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-bold disabled:opacity-50">발행하기</button>
             </div>
           </div>
-        </div>
+        </AdminModal>
+      )}
+
+      {/* ───── [모달] QR 코드 ───── */}
+      {qrTarget && (
+        <AdminModal title="환자용 QR 코드" onClose={() => setQrTarget(null)}>
+          <div className="flex flex-col items-center py-6">
+            <div className="p-6 bg-white rounded-[2.5rem] shadow-xl border border-slate-50 mb-6">
+              <QRCodeSVG value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/${qrTarget.id}`} size={220} />
+            </div>
+            <p className="text-sm font-bold text-slate-800 mb-1">{qrTarget.patient_name_input}님 처방전</p>
+            <p className="text-[10px] text-slate-400 font-medium break-all text-center max-w-[200px] mb-8">
+              이 코드를 스캔하면 즉시 운동 가이드로 연결됩니다.
+            </p>
+            <button onClick={() => setQrTarget(null)} className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold active:scale-[0.98] transition-all">닫기</button>
+          </div>
+        </AdminModal>
       )}
     </main>
   );

@@ -5,12 +5,12 @@ export interface Breathing {
 }
 
 export interface Exercise {
-  id: string; // 'neck-1' 등
+  id: string;
   name: string;
-  body_part: string; // DB match
+  body_part: string;
   description?: string;
-  steps: string[]; // JSONB -> string[]
-  breathing: Breathing; // JSONB -> Breathing
+  steps: string[];
+  breathing: Breathing;
   default_reps: number;
   default_sets: number;
   svg_key: string;
@@ -21,7 +21,7 @@ export interface Exercise {
 }
 
 export interface Prescription {
-  id: string; // UUID (Token 역할)
+  id: string;
   therapist_id?: string;
   patient_id?: string;
   patient_name_input: string;
@@ -29,7 +29,6 @@ export interface Prescription {
   notes?: string;
   created_at: string;
   expires_at?: string;
-  // Join 데이터 (처방전에 포함된 운동들)
   items?: PrescriptionItem[];
 }
 
@@ -41,8 +40,7 @@ export interface PrescriptionItem {
   custom_sets?: number;
   item_notes?: string;
   sort_order: number;
-  // Join 데이터
-  exercise?: Exercise;
+  exercise?: Exercise; // Joined data
 }
 
 export interface ExerciseLog {
@@ -56,6 +54,15 @@ export interface ExerciseLog {
   pain_score_after: number;
   feedback?: string;
   created_at: string;
+  // Joined data
+  exercise?: {
+    name: string;
+    body_part: string;
+  };
+  prescription?: {
+    patient_name_input: string;
+    therapist_id: string;
+  };
 }
 
 export interface ExercisesData {
