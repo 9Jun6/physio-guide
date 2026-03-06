@@ -4,7 +4,7 @@ import { Exercise } from "../../types";
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
-  const { data: exercises, error } = await supabase
+  const { data, error } = await supabase
     .from('exercises')
     .select('*')
     .order('created_at', { ascending: true });
@@ -13,11 +13,12 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const bodyParts = Array.from(new Set(exercises.map(e => e.body_part)));
+  const exercises = (data || []) as Exercise[];
+  const bodyParts = Array.from(new Set(exercises.map((e: Exercise) => e.body_part)));
   
   return NextResponse.json({ 
     bodyParts, 
-    exercises: exercises as Exercise[]
+    exercises
   });
 }
 
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
   if (action === "add" || action === "update") {
     const { error } = await supabase
       .from('exercises')
-      .upsert(exercise); // Exercise 타입 데이터를 그대로 전송
+      .upsert(exercise);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } else if (action === "delete") {
     const { error } = await supabase

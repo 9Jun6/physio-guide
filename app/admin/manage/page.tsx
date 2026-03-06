@@ -40,7 +40,7 @@ export default function AdminManagePage() {
   const [qrTarget, setQrTarget] = useState<Prescription | null>(null);
 
   // Log state
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]); // 타입 추론을 위해 일단 any[] 유지하되 내부 맵에서는 e 명시
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
