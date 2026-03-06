@@ -180,70 +180,350 @@ const svgMap: Record<string, ReactElement> = {
 
   /* ── 허리 ─────────────────────────────────────── */
 
+  /* ── back-knee-chest 키프레임 F1 (시작: 등 대고 눕기, 다리 뻗음) ── */
   "back-knee-chest": (
-    <svg viewBox="0 0 200 175" className="w-full h-full" fill="none">
+    <svg viewBox="0 0 220 185" className="w-full h-full" fill="none">
+      {/*
+        KEYFRAME: F1 | back-knee-chest | lying flat
+        shoulder-near=(55,118) shoulder-far=(52,103)
+        elbow-near=(90,126)    elbow-far=(87,111)
+        wrist-near=(126,133)   wrist-far=(123,118)
+        hip-near=(148,124)     hip-far=(145,109)
+        knee-near=(188,129)    knee-far=(185,114)
+        ankle-near=(210,132)   ankle-far=(207,117)
+      */}
       {/* 매트 */}
-      <rect x="8" y="152" width="184" height="5" rx="2.5" fill="#E2E8F0"/>
+      <rect x="6" y="158" width="208" height="6" rx="3" fill="#CBD5E1"/>
 
-      {/* ── 머리 (측면, 누운 자세) ── */}
-      <ellipse cx="22" cy="114" rx="13" ry="12" stroke={B} strokeWidth="2" fill="white"/>
-      {/* 머리카락 호 */}
-      <path d="M10 109 C13 101 31 101 34 109" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* ─── 원경 팔 (far arm) ─── */}
+      <path d="M52 106 C68 109 98 114 123 118" stroke="#1E293B" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      {/* 손 */}
+      <ellipse cx="126" cy="118" rx="4" ry="3" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
+
+      {/* ─── 원경 다리 (far leg) ─── */}
+      {/* 허벅지 far */}
+      <path d="M145 109 C158 111 172 112 185 114" stroke="#1E293B" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      {/* 정강이 far */}
+      <path d="M185 114 C195 115 205 116 210 117" stroke="#1E293B" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+
+      {/* ─── 몸통 (torso, closed silhouette, 3/4뷰) ─── */}
+      <path d="
+        M 36 108
+        C 38 104 42 101 52 103
+        C 56 104 58 106 58 110
+        C 58 114 56 117 55 118
+        C 80 122 112 126 148 124
+        C 150 124 153 123 154 121
+        C 155 118 153 115 150 113
+        C 150 113 148 111 145 109
+        C 112 111 78 107 52 103
+        Z
+      " fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round"/>
+      {/* 복직근 가로선 */}
+      <path d="M88 121 C100 119 112 119 124 121" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M90 126 C102 124 114 124 126 126" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      {/* 흉근 경계 */}
+      <path d="M60 112 C72 108 84 107 96 110" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 근경 팔 (near arm) ─── */}
+      {/* 상완 */}
+      <path d="
+        M 55 118 C 60 120 72 123 90 126
+        C 94 127 96 129 95 132
+        C 94 134 92 135 90 134
+        C 72 131 60 128 56 126
+        C 53 124 53 121 55 118 Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      {/* 전완 */}
+      <path d="
+        M 90 126 C 104 129 116 132 126 133
+        C 129 133 130 135 129 137
+        C 128 139 126 139 124 138
+        C 114 137 102 134 88 131
+        C 86 131 86 129 87 128
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      {/* 손 near */}
+      <ellipse cx="129" cy="136" rx="5" ry="3.5" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
+      {/* 이두근 윤곽 */}
+      <path d="M62 122 C70 120 80 120 88 123" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 근경 다리 (near leg) ─── */}
+      {/* 허벅지 near */}
+      <path d="
+        M 148 124 C 162 126 175 128 188 129
+        C 190 129 191 131 190 133
+        C 189 135 187 135 185 134
+        C 172 133 159 131 146 129
+        C 144 128 144 126 146 125
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      {/* 대퇴사두근 분리선 */}
+      <path d="M158 127 C165 126 172 126 180 128" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      {/* 정강이/비복근 near */}
+      <path d="
+        M 188 129 C 197 130 207 131 212 132
+        C 214 132 214 134 212 135
+        C 210 136 208 136 206 135
+        C 201 134 193 133 186 132
+        C 184 131 184 130 185 129
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* 비복근 윤곽 */}
+      <path d="M195 131 C199 130 203 130 207 131" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 머리 ─── */}
+      {/* 머리 실루엣 */}
+      <ellipse cx="24" cy="112" rx="16" ry="14" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6"/>
+      {/* 머리카락 */}
+      <path d="M9 108 C10 97 18 93 24 93 C30 93 38 97 39 108 C34 102 14 102 9 108 Z" fill="#3D2B1F"/>
       {/* 귀 */}
-      <path d="M33 113 C36 111 36 118 33 117" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      {/* 턱선 */}
-      <path d="M22 126 C25 128 30 127 33 123" stroke={B} strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      <path d="M38 112 C41 110 42 115 39 116" stroke="#1E293B" strokeWidth="1.3" fill="#E8D5C4" strokeLinecap="round"/>
+      {/* 목 */}
+      <path d="
+        M 33 120 C 36 124 40 126 44 126
+        C 46 126 47 128 46 129
+        C 45 131 43 131 41 130
+        C 37 129 33 127 30 123
+        C 29 121 30 119 32 119 Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* 눈썹 */}
+      <path d="M19 106 C22 104 26 105" stroke="#3D2B1F" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      {/* 눈 */}
+      <ellipse cx="24" cy="109" rx="2" ry="2.5" fill="#1E293B"/>
+      <ellipse cx="24.6" cy="108.4" rx="0.7" ry="0.7" fill="white"/>
+      {/* 코 */}
+      <path d="M31 111 C34 112 34 116 32 117" stroke="#A07060" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      {/* 입 */}
+      <path d="M26 120 C28 121 31 120" stroke="#A06050" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      {/* 삼각근 */}
+      <path d="M52 103 C54 100 56 100 58 103" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
 
-      {/* ── 목 ── */}
-      <path d="M32 121 C36 126 39 128 42 129" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+  /* ── back-knee-chest 키프레임 F1 (별도 키) ── */
+  "back-knee-chest-f1": (
+    <svg viewBox="0 0 220 185" className="w-full h-full" fill="none">
+      {/*
+        KEYFRAME: F1 | back-knee-chest | lying flat
+        shoulder-near=(55,118) shoulder-far=(52,103)
+        elbow-near=(90,126)    elbow-far=(87,111)
+        wrist-near=(126,133)   wrist-far=(123,118)
+        hip-near=(148,124)     hip-far=(145,109)
+        knee-near=(188,129)    knee-far=(185,114)
+        ankle-near=(210,132)   ankle-far=(207,117)
+      */}
+      {/* 매트 */}
+      <rect x="6" y="158" width="208" height="6" rx="3" fill="#CBD5E1"/>
+      <path d="M52 106 C68 109 98 114 123 118" stroke="#1E293B" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <ellipse cx="126" cy="118" rx="4" ry="3" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
+      <path d="M145 109 C158 111 172 112 185 114" stroke="#1E293B" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      <path d="M185 114 C195 115 205 116 210 117" stroke="#1E293B" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+      <path d="M36 108 C38 104 42 101 52 103 C56 104 58 106 58 110 C58 114 56 117 55 118 C80 122 112 126 148 124 C150 124 153 123 154 121 C155 118 153 115 150 113 C150 113 148 111 145 109 C112 111 78 107 52 103 Z" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M88 121 C100 119 112 119 124 121" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M90 126 C102 124 114 124 126 126" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M60 112 C72 108 84 107 96 110" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      <path d="M55 118 C60 120 72 123 90 126 C94 127 96 129 95 132 C94 134 92 135 90 134 C72 131 60 128 56 126 C53 124 53 121 55 118 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M90 126 C104 129 116 132 126 133 C129 133 130 135 129 137 C128 139 126 139 124 138 C114 137 102 134 88 131 C86 131 86 129 87 128 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <ellipse cx="129" cy="136" rx="5" ry="3.5" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
+      <path d="M62 122 C70 120 80 120 88 123" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      <path d="M148 124 C162 126 175 128 188 129 C190 129 191 131 190 133 C189 135 187 135 185 134 C172 133 159 131 146 129 C144 128 144 126 146 125 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M158 127 C165 126 172 126 180 128" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M188 129 C197 130 207 131 212 132 C214 132 214 134 212 135 C210 136 208 136 206 135 C201 134 193 133 186 132 C184 131 184 130 185 129 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M195 131 C199 130 203 130 207 131" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="112" rx="16" ry="14" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6"/>
+      <path d="M9 108 C10 97 18 93 24 93 C30 93 38 97 39 108 C34 102 14 102 9 108 Z" fill="#3D2B1F"/>
+      <path d="M38 112 C41 110 42 115 39 116" stroke="#1E293B" strokeWidth="1.3" fill="#E8D5C4" strokeLinecap="round"/>
+      <path d="M33 120 C36 124 40 126 44 126 C46 126 47 128 46 129 C45 131 43 131 41 130 C37 129 33 127 30 123 C29 121 30 119 32 119 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M19 106 C22 104 26 105" stroke="#3D2B1F" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="109" rx="2" ry="2.5" fill="#1E293B"/>
+      <ellipse cx="24.6" cy="108.4" rx="0.7" ry="0.7" fill="white"/>
+      <path d="M31 111 C34 112 34 116 32 117" stroke="#A07060" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      <path d="M26 120 C28 121 31 120" stroke="#A06050" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
 
-      {/* ── 몸통 윤곽 (이중선으로 입체감) ── */}
-      {/* 몸통 앞면(위) — 가슴·배 곡선 */}
-      <path d="M42 129 C62 124 90 124 116 128" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      {/* 몸통 뒷면(아래) — 등·매트 쪽 */}
-      <path d="M42 134 C66 136 92 136 116 133" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* 어깨 마감 곡선 */}
-      <path d="M42 129 C40 131 40 133 42 134" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* 고관절 마감 곡선 (둔부 힌트) */}
-      <path d="M116 128 C120 128 121 131 118 134" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
+  /* ── back-knee-chest 키프레임 F2 (중간: 무릎 90° 굴곡) ── */
+  "back-knee-chest-f2": (
+    <svg viewBox="0 0 220 185" className="w-full h-full" fill="none">
+      {/*
+        KEYFRAME: F2 | back-knee-chest | knees 90deg
+        shoulder-near=(55,118) shoulder-far=(52,103)
+        elbow-near=(90,126)    elbow-far=(87,111)
+        wrist-near=(138,105)   wrist-far=(134,91)
+        hip-near=(148,124)     hip-far=(145,109)
+        knee-near=(170,95)     knee-far=(166,80)
+        ankle-near=(175,130)   ankle-far=(171,115)
+      */}
+      {/* 매트 */}
+      <rect x="6" y="158" width="208" height="6" rx="3" fill="#CBD5E1"/>
 
-      {/* ── 앞쪽 다리 (근경) ── */}
-      {/* 허벅지 — 고관절 → 무릎 */}
-      <path d="M116 130 C126 127 138 114 150 100" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      {/* 허벅지 뒤쪽 선 */}
-      <path d="M118 133 C129 132 142 119 153 105" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      {/* 무릎 연결 */}
-      <path d="M150 100 C151 102 153 104 153 105" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      {/* 정강이 — 무릎 → 발 */}
-      <path d="M150 100 C148 91 141 84 133 78" stroke={B} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <path d="M153 105 C151 96 144 89 136 83" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      {/* 발 */}
-      <path d="M133 78 C129 74 123 76 120 81" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      <path d="M136 83 C132 80 126 81 123 85" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* ─── 원경 다리 far ─── */}
+      {/* 허벅지 far (45° 위로) */}
+      <path d="M145 109 C152 105 160 98 166 80" stroke="#1E293B" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      {/* 정강이 far (무릎에서 아래로) */}
+      <path d="M166 80 C168 90 170 103 171 115" stroke="#1E293B" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
 
-      {/* ── 뒤쪽 다리 (원경) ── */}
-      {/* 허벅지 */}
-      <path d="M115 133 C128 134 141 121 154 108" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="6 2"/>
-      {/* 정강이 */}
-      <path d="M154 108 C152 99 145 92 138 87" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="6 2"/>
-      {/* 발 */}
-      <path d="M138 87 C134 83 129 85 127 89" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeDasharray="4 2"/>
+      {/* ─── 원경 팔 — 무릎 방향으로 뻗는 중 ─── */}
+      <path d="M52 106 C72 104 100 100 134 91" stroke="#1E293B" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <ellipse cx="137" cy="90" rx="4" ry="3" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
 
-      {/* ── 무릎 강조 ── */}
-      <circle cx="151" cy="102" r="5.5" stroke={H} strokeWidth="2" fill={HF}/>
-      <circle cx="154" cy="108" r="4.5" stroke={H} strokeWidth="1.8" fill={HF}/>
+      {/* ─── 몸통 ─── */}
+      <path d="M36 108 C38 104 42 101 52 103 C56 104 58 106 58 110 C58 114 56 117 55 118 C80 122 112 126 148 124 C150 124 153 123 154 121 C155 118 153 115 150 113 C148 111 145 109 C112 111 78 107 52 103 Z" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M88 121 C100 119 112 119 124 121" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M90 126 C102 124 114 124 126 126" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M60 112 C72 108 84 107 96 110" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
 
-      {/* ── 앞쪽 팔 — 무릎을 감싸 정강이를 잡음 ── */}
-      <path d="M58 130 C80 122 108 106 134 80" stroke={B} strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* 손 (정강이 감싸는 커브) */}
-      <path d="M134 80 C138 76 143 78 140 85" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      {/* ─── 근경 다리 — 허벅지 (위로 45° 올라가는 중) ─── */}
+      <path d="
+        M 148 124 C 155 120 163 113 170 95
+        C 171 92 173 91 175 92
+        C 177 93 177 96 176 98
+        C 169 116 161 123 153 127
+        C 151 128 149 127 148 126
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M157 115 C161 110 165 104 169 96" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      {/* 무릎 near */}
+      <circle cx="170" cy="95" r="7" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.5"/>
+      {/* 정강이 near (무릎에서 아래로, 뒤쪽으로 접힘) */}
+      <path d="
+        M 170 95 C 172 108 174 120 175 130
+        C 175 132 173 133 172 133
+        C 170 133 169 132 169 130
+        C 168 120 166 108 164 96
+        C 164 94 166 93 168 93
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M171 112 C172 120 173 126 174 132" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
 
-      {/* ── 뒤쪽 팔 (원경, 점선) ── */}
-      <path d="M58 127 C82 118 110 103 137 88" stroke={B} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeDasharray="5 3"/>
-      <path d="M137 88 C141 85 145 87 143 93" stroke={B} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeDasharray="4 2"/>
+      {/* 무릎 강조 */}
+      <circle cx="170" cy="95" r="6" stroke={H} strokeWidth="2" fill={HF}/>
+      <circle cx="166" cy="80" r="4.5" stroke={H} strokeWidth="1.6" fill={HF}/>
 
-      {/* ── 허리 강조 ── */}
-      <path d="M82 133 C96 128 108 128 116 131" stroke={H} strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* ─── 근경 팔 — 무릎 방향으로 뻗는 중 ─── */}
+      <path d="
+        M 55 118 C 68 118 84 116 90 115
+        C 94 114 96 116 95 119
+        C 94 121 92 122 89 122
+        C 83 123 67 125 56 125
+        C 53 125 53 122 55 118 Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="
+        M 90 115 C 108 112 124 108 138 105
+        C 141 104 143 106 142 109
+        C 141 111 139 112 137 112
+        C 123 115 107 119 89 122
+        C 87 122 87 120 88 118
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <ellipse cx="140" cy="108" rx="5" ry="3.5" fill="#E2C9B8" stroke="#1E293B" strokeWidth="1.2"/>
+
+      {/* ─── 머리 ─── */}
+      <ellipse cx="24" cy="112" rx="16" ry="14" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6"/>
+      <path d="M9 108 C10 97 18 93 24 93 C30 93 38 97 39 108 C34 102 14 102 9 108 Z" fill="#3D2B1F"/>
+      <path d="M38 112 C41 110 42 115 39 116" stroke="#1E293B" strokeWidth="1.3" fill="#E8D5C4" strokeLinecap="round"/>
+      <path d="M33 120 C36 124 40 126 44 126 C46 126 47 128 46 129 C45 131 43 131 41 130 C37 129 33 127 30 123 C29 121 30 119 32 119 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M19 106 C22 104 26 105" stroke="#3D2B1F" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="109" rx="2" ry="2.5" fill="#1E293B"/>
+      <ellipse cx="24.6" cy="108.4" rx="0.7" ry="0.7" fill="white"/>
+      <path d="M31 111 C34 112 34 116 32 117" stroke="#A07060" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      <path d="M26 120 C28 121 31 120" stroke="#A06050" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
+
+  /* ── back-knee-chest 키프레임 F3 (최종: 무릎 가슴까지) ── */
+  "back-knee-chest-f3": (
+    <svg viewBox="0 0 220 185" className="w-full h-full" fill="none">
+      {/*
+        KEYFRAME: F3 | back-knee-chest | knees to chest
+        shoulder-near=(55,118) shoulder-far=(52,103)
+        elbow-near=(90,126)    elbow-far=(87,111)
+        wrist-near=(138,98)    wrist-far=(134,84)
+        hip-near=(148,124)     hip-far=(145,109)
+        knee-near=(155,82)     knee-far=(150,68)
+        ankle-near=(152,102)   ankle-far=(148,88)
+      */}
+      {/* 매트 */}
+      <rect x="6" y="158" width="208" height="6" rx="3" fill="#CBD5E1"/>
+
+      {/* ─── 원경 다리 far (접혀서 뒤에 보임) ─── */}
+      {/* 허벅지 far */}
+      <path d="M145 109 C148 103 151 92 150 68" stroke="#1E293B" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      {/* 정강이 far */}
+      <path d="M150 68 C149 76 148 83 148 88" stroke="#1E293B" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+
+      {/* ─── 원경 팔 — 정강이 감싸 잡음 ─── */}
+      <path d="M52 106 C74 101 106 94 134 84" stroke="#1E293B" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M134 84 C138 81 143 83 141 89" stroke="#1E293B" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 몸통 (허리 살짝 들림) ─── */}
+      <path d="M36 108 C38 104 42 101 52 103 C56 104 58 106 58 110 C58 114 56 117 55 118 C80 122 112 126 148 124 C150 124 153 122 153 119 C153 116 151 114 149 113 C147 111 145 109 C112 111 78 107 52 103 Z" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M88 121 C100 119 112 119 124 121" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M90 126 C102 124 114 124 126 126" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      <path d="M60 112 C72 108 84 107 96 110" stroke="#64748B" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 근경 허벅지 (거의 수직, 가슴 방향) ─── */}
+      <path d="
+        M 148 124 C 150 117 153 105 155 82
+        C 155 79 157 78 159 79
+        C 161 80 162 83 161 85
+        C 159 108 156 120 153 127
+        C 152 129 150 129 148 127
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M153 112 C154 104 155 94 156 84" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+
+      {/* 무릎 near — 가슴 앞 */}
+      <circle cx="155" cy="82" r="8" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.5"/>
+
+      {/* ─── 근경 정강이 (무릎에서 아래로 접힘) ─── */}
+      <path d="
+        M 155 82 C 153 88 151 96 152 102
+        C 152 105 150 106 148 106
+        C 146 106 145 104 145 102
+        C 144 96 146 88 148 82
+        C 149 80 152 80 154 81
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* 비복근 */}
+      <path d="M152 90 C152 95 151 100 151 104" stroke="#64748B" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+
+      {/* 무릎 강조 */}
+      <circle cx="155" cy="82" r="7" stroke={H} strokeWidth="2" fill={HF}/>
+      <circle cx="150" cy="68" r="5" stroke={H} strokeWidth="1.6" fill={HF}/>
+      {/* 허리 강조 */}
+      <path d="M100 124 C118 121 133 121 148 124" stroke={H} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+
+      {/* ─── 근경 팔 — 정강이 감싸 잡음 ─── */}
+      <path d="
+        M 55 118 C 68 116 82 112 90 110
+        C 94 109 96 111 95 114
+        C 94 117 92 118 89 119
+        C 81 121 67 125 56 126
+        C 53 126 53 122 55 118 Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="
+        M 90 110 C 108 105 124 101 138 98
+        C 141 97 143 99 142 102
+        C 141 105 139 106 137 106
+        C 123 109 107 114 89 119
+        C 87 119 87 117 88 115
+        Z
+      " fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.5" strokeLinejoin="round"/>
+      {/* 손 — 정강이 잡음 */}
+      <path d="M138 98 C143 95 148 97 146 103" stroke="#1E293B" strokeWidth="1.4" fill="#E2C9B8" strokeLinecap="round"/>
+
+      {/* ─── 머리 ─── */}
+      <ellipse cx="24" cy="112" rx="16" ry="14" fill="#F1F5F9" stroke="#1E293B" strokeWidth="1.6"/>
+      <path d="M9 108 C10 97 18 93 24 93 C30 93 38 97 39 108 C34 102 14 102 9 108 Z" fill="#3D2B1F"/>
+      <path d="M38 112 C41 110 42 115 39 116" stroke="#1E293B" strokeWidth="1.3" fill="#E8D5C4" strokeLinecap="round"/>
+      <path d="M33 120 C36 124 40 126 44 126 C46 126 47 128 46 129 C45 131 43 131 41 130 C37 129 33 127 30 123 C29 121 30 119 32 119 Z" fill="#E8D5C4" stroke="#1E293B" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M19 106 C22 104 26 105" stroke="#3D2B1F" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="109" rx="2" ry="2.5" fill="#1E293B"/>
+      <ellipse cx="24.6" cy="108.4" rx="0.7" ry="0.7" fill="white"/>
+      <path d="M31 111 C34 112 34 116 32 117" stroke="#A07060" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      <path d="M26 120 C28 121 31 120" stroke="#A06050" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
     </svg>
   ),
 
