@@ -1,72 +1,160 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const supabase = createClient();
+  
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // 이미 로그인되어 있는지 확인
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // 프로필 확인 후 관리자/치료사면 대시보드로 이동
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile && (profile.role === "admin" || profile.role === "therapist")) {
+          router.push("/admin/manage");
+        }
+      }
+    };
+    checkUser();
+  }, [router, supabase]);
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      if (isLogin) {
+        // 1. 로그인
+        const { error: loginErr } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (loginErr) throw loginErr;
+      } else {
+        // 2. 회원가입 (치료사 전용)
+        const { data: authData, error: signupErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName }
+          }
+        });
+        if (signupErr) throw signupErr;
 
-    setLoading(false);
+        if (authData.user) {
+          // profiles 테이블에 치료사로 등록 (Trigger가 없을 경우를 대비한 수동 등록)
+          const { error: profileErr } = await supabase
+            .from("profiles")
+            .insert([{
+              id: authData.user.id,
+              role: "therapist",
+              full_name: fullName,
+              email: email
+            }]);
+          if (profileErr) throw profileErr;
+        }
+        alert("회원가입이 완료되었습니다. 로그인해 주세요!");
+        setIsLogin(true);
+        setLoading(false);
+        return;
+      }
 
-    if (res.ok) {
-      sessionStorage.setItem("adminPassword", password);
       router.push("/admin/manage");
-    } else {
-      setError("비밀번호가 올바르지 않습니다.");
+    } catch (err: any) {
+      setError(err.message || "인증에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-      <div className="bg-white rounded-3xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🔐</div>
-          <h1 className="text-2xl font-bold text-slate-800">관리자 로그인</h1>
-          <p className="text-slate-500 text-sm mt-1">물리치료사 전용 페이지</p>
+      <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 border border-slate-100">
+        <div className="text-center mb-10">
+          <div className="text-5xl mb-4">🏥</div>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">PhysioGuide</h1>
+          <p className="text-slate-400 mt-2 font-medium">치료사 전용 관리 시스템</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="password"
-            placeholder="비밀번호 입력"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
-            autoFocus
-          />
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        <form onSubmit={handleAuth} className="space-y-5">
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">이름</label>
+              <input
+                type="text"
+                required
+                className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-200 text-slate-700 font-medium transition-all"
+                placeholder="홍길동 치료사"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">이메일</label>
+            <input
+              type="email"
+              required
+              className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-200 text-slate-700 font-medium transition-all"
+              placeholder="example@physio.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">비밀번호</label>
+            <input
+              type="password"
+              required
+              className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-200 text-slate-700 font-medium transition-all"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-500 text-sm py-3 px-4 rounded-xl font-medium border border-red-100 animate-shake">
+              ⚠️ {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={loading || !password}
-            className="w-full py-3 rounded-xl bg-blue-500 text-white font-bold text-lg hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
+            disabled={loading}
+            className="w-full py-4 rounded-2xl bg-slate-800 text-white font-bold text-lg hover:bg-slate-900 active:scale-[0.98] transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
           >
-            {loading ? "확인 중..." : "로그인"}
+            {loading ? "처리 중..." : isLogin ? "로그인" : "치료사 가입하기"}
           </button>
         </form>
-      </div>
 
-        <div className="text-center mt-6">
-          <a
-            href="/"
-            className="text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2 transition-colors"
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-sm font-bold text-blue-500 hover:text-blue-600 transition-colors"
           >
-            ← 일반 사용자 화면으로
-          </a>
+            {isLogin ? "처음이신가요? 치료사로 가입하기" : "이미 계정이 있나요? 로그인하기"}
+          </button>
         </div>
       </div>
     </main>
