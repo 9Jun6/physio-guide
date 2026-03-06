@@ -2,130 +2,110 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-white text-slate-900 selection:bg-blue-100 overflow-hidden">
-      {/* ───── Hero Section ───── */}
-      <section className="relative pt-20 pb-32 px-6">
-        {/* 배경 장식 (힙한 느낌의 추상적인 그라데이션) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-gradient-to-b from-blue-50/50 to-transparent rounded-full blur-3xl -z-10" />
-        
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-4 shadow-xl shadow-blue-900/20 animate-bounce">
-            The Future of Rehabilitation
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.9]">
-            재활의 기준을 <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">새로고침</span> 하다.
+    <main className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100">
+      {/* ───── Hero Section: 핵심 가치 전달 ───── */}
+      <section className="pt-24 pb-20 px-6 bg-white border-b border-slate-100">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">
+            물리치료사의 처방을 <br />
+            환자의 스마트폰으로 직접 전송하세요.
           </h1>
           
-          <p className="text-lg md:text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-            종이 처방전은 이제 그만. <br className="md:hidden" /> 
-            QR 하나로 연결되는 스마트 재활 가이드, **PhysioGuide**와 함께하세요.
+          <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
+            복잡한 설명 대신 QR 코드로 운동 가이드를 전달하고, <br className="hidden md:block" />
+            환자의 운동 수행 여부와 통증 변화를 데이터로 확인합니다.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
             <Link 
               href="/admin" 
-              className="group relative px-8 py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-slate-200"
+              className="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                치료사로 시작하기
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              치료사 대시보드 시작
             </Link>
             
             <Link 
               href="/exercises" 
-              className="px-8 py-5 bg-white text-slate-900 border-2 border-slate-100 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-all hover:border-slate-200 active:scale-95"
+              className="w-full sm:w-auto px-10 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold text-lg hover:bg-slate-50 transition-all"
             >
-              운동 라이브러리 보기
+              운동 라이브러리 조회
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ───── Feature Grid ───── */}
-      <section className="px-6 py-24 bg-slate-50/50">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500">
-            <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner">
-              📱
+      {/* ───── 실무 중심 기능 안내 ───── */}
+      <section className="px-6 py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* 기능 1 */}
+            <div className="space-y-4">
+              <div className="text-blue-600 font-black text-xl italic tracking-tighter">01.</div>
+              <h3 className="text-xl font-bold text-slate-800">즉시 생성되는 QR 처방</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                운동 종목과 횟수를 선택하면 고유 QR 코드가 생성됩니다. 환자는 별도의 앱 설치 없이 웹에서 바로 가이드를 확인합니다.
+              </p>
             </div>
-            <h3 className="text-xl font-bold mb-3">스마트 QR 처방</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">
-              더 이상 환자에게 말로 설명하지 마세요. 클릭 몇 번으로 생성된 QR 코드가 완벽한 가이드를 전달합니다.
-            </p>
-          </div>
 
-          {/* Card 2 */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500">
-            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner">
-              ⏱️
+            {/* 기능 2 */}
+            <div className="space-y-4">
+              <div className="text-blue-600 font-black text-xl italic tracking-tighter">02.</div>
+              <h3 className="text-xl font-bold text-slate-800">정밀한 홈 가이드</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                단계별 설명과 실시간 호흡 타이머를 제공하여, 환자가 병원 밖에서도 치료사의 지시대로 정확하게 운동하게 돕습니다.
+              </p>
             </div>
-            <h3 className="text-xl font-bold mb-3">실시간 호흡 타이머</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">
-              환자가 집에서도 정확한 템포로 운동할 수 있도록 시각적, 청각적 가이드를 실시간으로 제공합니다.
-            </p>
-          </div>
 
-          {/* Card 3 */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500">
-            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner">
-              📊
+            {/* 기능 3 */}
+            <div className="space-y-4">
+              <div className="text-blue-600 font-black text-xl italic tracking-tighter">03.</div>
+              <h3 className="text-xl font-bold text-slate-800">객관적인 경과 모니터링</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                환자가 입력한 운동 전/후 통증 점수(VAS)와 피드백을 대시보드에서 확인하여 다음 치료 계획에 반영할 수 있습니다.
+              </p>
             </div>
-            <h3 className="text-xl font-bold mb-3">데이터 기반 모니터링</h3>
-            <p className="text-slate-500 text-sm leading-relaxed font-medium">
-              환자의 통증 지수와 피드백을 실시간으로 확인하고, 데이터에 기반한 정밀한 치료 계획을 수립하세요.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* ───── "Superiority" Section ───── */}
-      <section className="px-6 py-32 overflow-hidden">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-16">
-          <div className="flex-1 space-y-6">
-            <h2 className="text-4xl md:text-5xl font-black leading-tight text-slate-900">
-              전문가를 위한 <br />
-              압도적인 디테일.
-            </h2>
-            <ul className="space-y-4">
-              {[
-                "개별 맞춤형 횟수 및 세트 설정",
-                "부위별 고해상도 운동 애니메이션",
-                "치료사-환자간 다이렉트 피드백 루프",
-                "클라우드 기반 처방 이력 관리"
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 font-bold text-slate-600">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-[10px]">
-                    ✓
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex-1 relative">
-            {/* 힙한 느낌의 인터페이스 프리뷰 (추상적인 디자인) */}
-            <div className="w-full aspect-square bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] shadow-3xl shadow-blue-200 flex items-center justify-center p-8 rotate-3 transition-transform hover:rotate-0 duration-700">
-              <div className="w-full h-full bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 flex flex-col items-center justify-center text-white text-center p-6">
-                <div className="text-6xl mb-4">🏆</div>
-                <div className="text-2xl font-black mb-2">PhysioGuide Pro</div>
-                <div className="text-sm font-medium opacity-80">Built for Professionals</div>
+      {/* ───── 시스템 구조 (Grounded) ───── */}
+      <section className="px-6 py-20 bg-slate-900 text-white rounded-t-[3rem]">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold">환자 관리에만 <br />집중할 수 있는 환경.</h2>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-slate-400">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                  <span className="text-sm font-medium text-slate-300">치료사별 개별 계정 및 환자 데이터 격리</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-400">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                  <span className="text-sm font-medium text-slate-300">클라우드 기반 실시간 로그 동기화</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-400">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                  <span className="text-sm font-medium text-slate-300">맞춤형 횟수, 세트, 주의사항 전달</span>
+                </div>
               </div>
+            </div>
+            
+            <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm">
+              <div className="text-[10px] uppercase font-bold text-blue-400 mb-2 tracking-widest">Management System</div>
+              <p className="text-xl font-medium leading-snug">
+                종이 유인물 소모 비용과 <br />
+                설명 시간을 70% 이상 <br />
+                단축합니다.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ───── Footer ───── */}
-      <footer className="px-6 py-12 border-t border-slate-100 text-center">
-        <p className="text-slate-400 text-sm font-bold tracking-widest uppercase">
-          © 2026 PhysioGuide. All Rights Reserved.
+      <footer className="px-6 py-10 text-center bg-slate-900 border-t border-white/5">
+        <p className="text-slate-500 text-xs font-medium uppercase tracking-widest">
+          PhysioGuide Professional Patient Management System
         </p>
       </footer>
     </main>
