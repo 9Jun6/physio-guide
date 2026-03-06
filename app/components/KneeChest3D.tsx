@@ -196,28 +196,25 @@ function buildFigure(scene: THREE.Scene): Joints {
 function applyPose(joints: Joints, t: number) {
   const hipFlex    = THREE.MathUtils.lerp(0,   115 * DEG, t);
   const kneeFlex   = THREE.MathUtils.lerp(0,   140 * DEG, t);
-  const shouldFlex = THREE.MathUtils.lerp(5 * DEG, 55 * DEG, t);
+  const shouldFlex = THREE.MathUtils.lerp(0,        25 * DEG, t);
   const elbowFlex  = THREE.MathUtils.lerp(10 * DEG, 100 * DEG, t);
   const spineFlex  = THREE.MathUtils.lerp(0,   8 * DEG, t);
 
-  // Spine slight curl
-  joints.spine.rotation.z = spineFlex;
+  // After root.rotation.set(0, -PI/2, -PI/2), root's local X = world Z (sagittal axis).
+  // All sagittal-plane flexion must use .rotation.x.
+  joints.spine.rotation.x  = spineFlex;
 
-  // Hip flexion: thighs rotate forward (around Z in lying body space)
-  joints.lThigh.rotation.z = -hipFlex;
-  joints.rThigh.rotation.z = -hipFlex;
+  joints.lThigh.rotation.x = -hipFlex;
+  joints.rThigh.rotation.x = -hipFlex;
 
-  // Knee flexion: shins fold back relative to thigh
-  joints.lShin.rotation.z = kneeFlex;
-  joints.rShin.rotation.z = kneeFlex;
+  joints.lShin.rotation.x  = kneeFlex;
+  joints.rShin.rotation.x  = kneeFlex;
 
-  // Shoulder flexion: arms reach toward shins
-  joints.lUArm.rotation.z = shouldFlex;
-  joints.rUArm.rotation.z = shouldFlex;
+  joints.lUArm.rotation.x  = -shouldFlex;
+  joints.rUArm.rotation.x  = -shouldFlex;
 
-  // Elbow flexion: forearms curl
-  joints.lFArm.rotation.z = -elbowFlex;
-  joints.rFArm.rotation.z = -elbowFlex;
+  joints.lFArm.rotation.x  = elbowFlex;
+  joints.rFArm.rotation.x  = elbowFlex;
 }
 
 // ── Main component ─────────────────────────────────────────────────────────
@@ -273,9 +270,12 @@ export default function KneeChest3D() {
     // Position figure: lying on back along +X axis
     // Root is at hips; we rotate so the figure lies with head in +X direction
     // "Standing" Y becomes the lying X; rotate -90° around Z
-    joints.root.rotation.z = -Math.PI / 2;
-    // Lift off mat surface
-    joints.root.position.set(-0.5, 0.28, 0);
+    // rotation.set(rx, ry, rz) with XYZ order:
+    //   Ry(-90°): local +Z (chest) → world +X … then
+    //   Rz(-90°): local +Z (now world +X) → world +Y (up)
+    // Result: chest faces up, head points toward world +X
+    joints.root.rotation.set(0, -Math.PI / 2, -Math.PI / 2);
+    joints.root.position.set(0, 0.4, 0);
 
     // ── Animation loop ──
     let rafId: number;
