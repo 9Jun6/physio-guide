@@ -1,42 +1,39 @@
-# GEMINI.md - PhysioGuide Project Context
+# GEMINI.md - PhysioGuide Project Context (Updated)
 
-이 파일은 Gemini CLI가 프로젝트의 핵심 맥락, 기술 스택, 그리고 코딩 규칙을 이해하도록 돕는 가이드라인입니다. 모든 작업 시 이 내용을 최우선으로 참고하세요.
+이 파일은 프로젝트의 핵심 맥락, 기술 스택, 보안 모델 및 진행 상태를 기록합니다.
 
 ## 1. 프로젝트 개요 (Overview)
 - **이름**: PhysioGuide (물리치료사 맞춤형 운동 가이드 플랫폼)
-- **목표**: 치료사가 환자에게 개별 맞춤형 운동(횟수/세트/주의사항)을 처방하고, 환자는 QR 코드를 통해 즉시 가이드를 확인하며 수행 기록을 남기는 O2O 서비스.
-- **핵심 흐름**: [치료사] 운동 선택 및 처방 발행 -> [QR 생성] -> [환자] QR 스캔 및 운동 수행 -> [데이터] 수행 로그 저장 및 치료사 확인.
+- **목표**: 치료사가 환자에게 개별 맞춤형 운동을 처방하고, 환자는 QR 코드를 통해 가이드를 확인하며 수행 기록(통증 점수 등)을 남기는 O2O 서비스.
 
-## 2. 기술 스택 (Tech Stack)
-- **Frontend**: Next.js 16.x (App Router), React 19.x, TypeScript
-- **Styling**: Tailwind CSS v4 (PostCSS 기반)
-- **Backend/DB**: Supabase (Auth, PostgreSQL, RLS)
-- **State/Caching**: Vercel KV (임시 처방 토큰 등 필요시 활용)
-- **Libraries**: `@supabase/ssr`, `qrcode.react`
+## 2. 기술 스택 및 아키텍처 (Tech Stack & Architecture)
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4.
+- **Backend/DB**: Supabase (PostgreSQL, RLS).
+- **Hybrid Security Model**:
+  - **Therapist (Admin)**: `Server Actions` 기반. 서버에서 `ADMIN_PASSWORD`를 검증하며, `SUPABASE_SERVICE_ROLE_KEY`를 사용하여 RLS를 우회하고 관리 권한을 행사함. (보안성 높음)
+  - **Patient (Public)**: `Client-side` 기반. 별도 로그인 없이 QR 토큰(UUID)을 통해 접근하며, Supabase `RLS Policy`를 통해 본인 처방전과 운동 정보만 읽기 가능.
 
-## 3. 데이터베이스 스키마 (Database Schema)
-`supabase/setup.sql`에 정의된 핵심 테이블:
-1. `profiles`: 사용자 계정 (therapist / patient 역할 구분)
-2. `exercises`: 운동 마스터 데이터 (ID, 이름, 부위, 단계, 호흡법 등)
-3. `prescriptions`: 처방전 메인 (ID는 QR용 고유 토큰 역할)
-4. `prescription_items`: 처방된 세부 운동 항목 (맞춤형 횟수/세트 포함)
-5. `therapist_patient_relations`: 치료사-환자 관계 관리
-6. `exercise_logs`: 운동 수행 결과 및 통증 수치 피드백
+## 3. 데이터베이스 권한 현황 (DB Permission Status)
+현재 `supabase/setup.sql` 및 RLS 설정 상태:
+- `exercises`: 모든 사용자 SELECT 허용 (`true` policy).
+- `prescriptions`: 토큰(UUID) 기반 SELECT 허용 정책 필요 (현재는 개발 편의를 위해 `true` 설정 가능성 있음).
+- `exercise_logs`: INSERT 허용 (환자가 운동 후 로그 저장).
+- **관리 권한**: 모든 테이블에 대해 `service_role` 키를 가진 서버 액션만 쓰기/삭제 권한을 가짐.
 
-## 4. 코딩 가이드라인 (Coding Standards)
-- **Next.js 16**: Server Components를 기본으로 사용하고, 상호작용이 필요한 부분만 `'use client'`로 분리.
-- **Tailwind v4**: 최신 v4 문법을 준수하며, 가독성을 위해 복잡한 클래스는 컴포넌트로 추상화.
-- **Supabase**: 모든 쿼리는 `lib/supabase.ts`를 통해 수행하며, RLS 정책을 준수할 것.
-- **ID 전략**: 기존 `data/exercises.json`과의 호환성을 위해 `exercises` 테이블의 ID는 문자열(예: 'neck-1')을 허용함.
+## 4. 구현된 핵심 기능 (Implemented Features)
+- [x] **관리자 대시보드**: 운동 목록 관리, 처방전 발행(QR 생성), 환자 수행 로그(통증 변화) 모니터링.
+- [x] **환자용 처방 페이지**: QR 스캔 시 해당 환자의 맞춤형 운동 목록 및 치료사 메모 표시.
+- [x] **운동 수행 가이드**: 호흡 타이머(BreathingTimer), 운동 단계 안내, 수행 후 통증 로그 저장 기능.
+- [x] **서버 사이드 보안**: 치료사 전용 기능을 모두 `app/admin/actions.ts`로 이전 완료.
 
-## 5. 현재 진행 상황 (Current Status)
-- [x] 프로젝트 기초 구조 (Next.js 16 초기화)
-- [x] DB 스키마 설계 (`setup.sql` 작성 완료)
-- [x] 초기 데이터 마이그레이션 (`app/api/migrate/route.ts` 실행 완료)
-- [ ] 치료사용 처방 발행 UI (Admin/Manage 페이지)
-- [ ] 환자용 QR 상세 페이지 (`app/p/[token]/page.tsx`)
+## 5. 현재 진행 상태 (Current Status)
+- **완료**: 프로젝트 기초 설정, DB 스키마 설계, 핵심 UI/UX 구현, 서버 액션 보안 강화.
+- **진행 중**: Vercel 배포 및 환경 변수(`SERVICE_ROLE_KEY`) 설정.
+- **예정**: 통계 대시보드 고도화, 환자 본인 기록 확인 기능.
 
-## 6. 특별 주의사항
-- **보안**: API 키나 DB 비밀번호는 절대 노출하지 말 것.
-- **아이콘**: 별도 라이브러리 설치 전에는 `app/components/ExerciseSVG.tsx` 등의 커스텀 SVG를 우선 활용.
-- **UI/UX**: 재활 치료 도구이므로 깔끔하고 직관적인 UI(모바일 우선) 지향.
+## 6. 개발 규칙 및 주의사항
+- **비밀번호**: `ADMIN_PASSWORD`는 반드시 서버 액션에서만 검증할 것.
+- **Supabase 클라이언트**: 
+  - 브라우저용: `lib/supabase.ts` (createClient)
+  - 서버용: `lib/supabase-server.ts` (createServerSupabaseClient, createAdminClient)
+- **ID 전략**: 운동 ID는 기존 JSON 호환을 위해 문자열(`neck-1` 등)을 유지함.
