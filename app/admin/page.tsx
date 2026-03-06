@@ -57,21 +57,28 @@ export default function AdminLoginPage() {
             data: { full_name: fullName }
           }
         });
-        if (signupErr) throw signupErr;
+        
+        if (signupErr) {
+          throw new Error(`회원가입 실패: ${signupErr.message}`);
+        }
 
         if (authData.user) {
-          // profiles 테이블에 치료사로 등록 (Trigger가 없을 경우를 대비한 수동 등록)
+          // profiles 테이블에 치료사로 등록
           const { error: profileErr } = await supabase
             .from("profiles")
-            .insert([{
+            .upsert([{ // insert 대신 upsert 사용으로 안정성 확보
               id: authData.user.id,
               role: "therapist",
               full_name: fullName,
               email: email
             }]);
-          if (profileErr) throw profileErr;
+          
+          if (profileErr) {
+            console.error("Profile creation error:", profileErr);
+            throw new Error(`프로필 생성 실패: ${profileErr.message}`);
+          }
         }
-        alert("회원가입이 완료되었습니다. 로그인해 주세요!");
+        alert("회원가입이 성공했습니다! 이제 로그인해 주세요.");
         setIsLogin(true);
         setLoading(false);
         return;
