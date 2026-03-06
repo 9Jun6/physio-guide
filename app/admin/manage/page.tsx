@@ -1,39 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { Exercise, ExercisesData } from "../../types";
+import { createClient } from "@/lib/supabase";
+import { Exercise, Prescription, PrescriptionItem } from "../../types";
 
 const BODY_PARTS = ["목", "어깨", "허리", "무릎", "발목", "고관절", "팔꿈치", "손목"];
+const supabase = createClient();
 
 const emptyExercise = (): Omit<Exercise, "id"> => ({
   name: "",
-  bodyPart: "목",
+  body_part: "목",
   description: "",
   steps: [""],
   breathing: { inhale: 4, hold: 2, exhale: 4 },
-  reps: 10,
-  sets: 3,
-  svgKey: "",
+  default_reps: 10,
+  default_sets: 3,
+  svg_key: "",
 });
-
-interface Prescription {
-  id: string;
-  token: string;
-  patientName: string;
-  notes: string;
-  exerciseIds: string[];
-  createdAt: string;
-}
-
-function generateToken() {
-  return Math.random().toString(36).slice(2, 10);
-}
 
 export default function AdminManagePage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"exercises" | "prescriptions">("exercises");
+  const [tab, setTab] = useState<"exercises" | "prescriptions" | "logs">("exercises");
 
   // Exercise state
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -48,49 +37,79 @@ export default function AdminManagePage() {
   const [prescForm, setPrescForm] = useState({ patientName: "", notes: "", exerciseIds: [] as string[] });
   const [qrTarget, setQrTarget] = useState<Prescription | null>(null);
 
+  // Log state
+  const [logs, setLogs] = useState<any[]>([]);
+
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
   const adminPassword =
     typeof window !== "undefined" ? sessionStorage.getItem("adminPassword") ?? "" : "";
 
-  useEffect(() => {
-    if (!adminPassword) { router.push("/admin"); return; }
-    loadExercises();
-    loadPrescriptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadExercises = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("exercises")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      setMsg(`오류: 운동 정보를 불러오지 못했습니다. (${error.message})`);
+    } else {
+      setExercises(data || []);
+    }
   }, []);
 
-  const loadExercises = () =>
-    fetch("/api/exercises")
-      .then((r) => r.json())
-      .then((data: ExercisesData) => setExercises(data.exercises));
-
-  const loadPrescriptions = () =>
-    fetch(`/api/prescriptions?adminPassword=${encodeURIComponent(adminPassword)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.prescriptions) setPrescriptions(data.prescriptions);
-      });
-
-  // Exercise API
-  const apiCall = async (action: string, exercise: Partial<Exercise>) => {
-    setSaving(true);
-    const res = await fetch("/api/exercises", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminPassword, action, exercise }),
-    });
-    setSaving(false);
-    if (!res.ok) {
-      const err = await res.json();
-      setMsg(`오류: ${err.error}`);
-      return false;
+  const loadPrescriptions = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("prescriptions")
+      .select(`
+        *,
+        items:prescription_items(
+          *,
+          exercise:exercises(*)
+        )
+      `)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      setMsg(`오류: 처방전 정보를 불러오지 못했습니다. (${error.message})`);
+    } else {
+      setPrescriptions(data || []);
     }
-    await loadExercises();
-    return true;
-  };
+  }, []);
 
+  const loadLogs = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("exercise_logs")
+      .select(`
+        *,
+        exercise:exercises(name, body_part),
+        prescription:prescriptions(patient_name_input)
+      `)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      setMsg(`오류: 수행 로그를 불러오지 못했습니다. (${error.message})`);
+    } else {
+      setLogs(data || []);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!adminPassword) { 
+      router.push("/admin"); 
+      return; 
+    }
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([loadExercises(), loadPrescriptions(), loadLogs()]);
+      setLoading(false);
+    };
+    init();
+  }, [adminPassword, router, loadExercises, loadPrescriptions, loadLogs]);
+
+  // Exercise Actions
   const handleEdit = (ex: Exercise) => {
     setEditTarget(ex);
     setIsNew(false);
@@ -107,18 +126,38 @@ export default function AdminManagePage() {
 
   const handleSave = async () => {
     if (!editTarget) return;
-    const exercise = { ...form, id: editTarget.id };
-    const ok = await apiCall(isNew ? "add" : "update", exercise);
-    if (ok) {
+    setSaving(true);
+    
+    const exerciseData = {
+      ...form,
+      id: isNew ? undefined : editTarget.id,
+    };
+
+    const { error } = isNew 
+      ? await supabase.from("exercises").insert([exerciseData])
+      : await supabase.from("exercises").update(exerciseData).eq("id", editTarget.id);
+
+    setSaving(false);
+    if (error) {
+      setMsg(`오류: 저장 실패 (${error.message})`);
+    } else {
       setMsg(isNew ? "운동이 추가되었습니다." : "수정되었습니다.");
       setEditTarget(null);
+      loadExercises();
     }
   };
 
   const handleDelete = async (ex: Exercise) => {
     if (!confirm(`"${ex.name}"을(를) 삭제할까요?`)) return;
-    const ok = await apiCall("delete", { id: ex.id });
-    if (ok) setMsg("삭제되었습니다.");
+    setSaving(true);
+    const { error } = await supabase.from("exercises").delete().eq("id", ex.id);
+    setSaving(false);
+    if (error) {
+      setMsg(`오류: 삭제 실패 (${error.message})`);
+    } else {
+      setMsg("삭제되었습니다.");
+      loadExercises();
+    }
   };
 
   const updateStep = (i: number, val: string) => {
@@ -131,48 +170,66 @@ export default function AdminManagePage() {
     setForm({ ...form, steps: form.steps.filter((_, idx) => idx !== i) });
 
   const filtered =
-    filterPart === "전체" ? exercises : exercises.filter((e) => e.bodyPart === filterPart);
+    filterPart === "전체" ? exercises : exercises.filter((e) => e.body_part === filterPart);
 
-  // Prescription API
-  const prescApiCall = async (action: string, prescription: Partial<Prescription>) => {
-    setSaving(true);
-    const res = await fetch("/api/prescriptions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminPassword, action, prescription }),
-    });
-    setSaving(false);
-    if (!res.ok) {
-      const err = await res.json();
-      setMsg(`오류: ${err.error}`);
-      return false;
-    }
-    await loadPrescriptions();
-    return true;
-  };
-
+  // Prescription Actions
   const handlePrescSave = async () => {
-    if (!prescForm.patientName) return;
-    const prescription: Prescription = {
-      id: `presc-${Date.now()}`,
-      token: generateToken(),
-      patientName: prescForm.patientName,
-      notes: prescForm.notes,
-      exerciseIds: prescForm.exerciseIds,
-      createdAt: new Date().toISOString(),
-    };
-    const ok = await prescApiCall("add", prescription);
-    if (ok) {
+    if (!prescForm.patientName || prescForm.exerciseIds.length === 0) return;
+    setSaving(true);
+    
+    // 1. Create Prescription
+    const { data: prescData, error: prescError } = await supabase
+      .from("prescriptions")
+      .insert([{
+        patient_name_input: prescForm.patientName,
+        notes: prescForm.notes,
+        is_claimed: false
+      }])
+      .select()
+      .single();
+
+    if (prescError) {
+      setMsg(`오류: 처방전 생성 실패 (${prescError.message})`);
+      setSaving(false);
+      return;
+    }
+
+    // 2. Create Prescription Items
+    const items = prescForm.exerciseIds.map((exId, idx) => {
+      const ex = exercises.find(e => e.id === exId);
+      return {
+        prescription_id: prescData.id,
+        exercise_id: exId,
+        custom_reps: ex?.default_reps,
+        custom_sets: ex?.default_sets,
+        sort_order: idx
+      };
+    });
+
+    const { error: itemError } = await supabase.from("prescription_items").insert(items);
+
+    setSaving(false);
+    if (itemError) {
+      setMsg(`오류: 운동 항목 저장 실패 (${itemError.message})`);
+    } else {
       setPrescModalOpen(false);
       setPrescForm({ patientName: "", notes: "", exerciseIds: [] });
       setMsg("처방전이 생성되었습니다.");
+      loadPrescriptions();
     }
   };
 
   const handlePrescDelete = async (p: Prescription) => {
-    if (!confirm(`"${p.patientName}"의 처방전을 삭제할까요?`)) return;
-    const ok = await prescApiCall("delete", { id: p.id });
-    if (ok) setMsg("삭제되었습니다.");
+    if (!confirm(`"${p.patient_name_input}"의 처방전을 삭제할까요?`)) return;
+    setSaving(true);
+    const { error } = await supabase.from("prescriptions").delete().eq("id", p.id);
+    setSaving(false);
+    if (error) {
+      setMsg(`오류: 삭제 실패 (${error.message})`);
+    } else {
+      setMsg("삭제되었습니다.");
+      loadPrescriptions();
+    }
   };
 
   const toggleExercise = (id: string) => {
@@ -186,8 +243,16 @@ export default function AdminManagePage() {
 
   const prescriptionUrl = (p: Prescription) =>
     typeof window !== "undefined"
-      ? `${window.location.origin}/p/${p.token}`
-      : `/p/${p.token}`;
+      ? `${window.location.origin}/p/${p.id}`
+      : `/p/${p.id}`;
+
+  if (loading && !exercises.length) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400">
+        로딩 중...
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-10">
@@ -220,6 +285,14 @@ export default function AdminManagePage() {
             }`}
           >
             처방전 관리
+          </button>
+          <button
+            onClick={() => { setTab("logs"); setMsg(""); }}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+              tab === "logs" ? "bg-white text-slate-800 shadow" : "text-slate-500"
+            }`}
+          >
+            진행 현황
           </button>
         </div>
 
@@ -270,13 +343,13 @@ export default function AdminManagePage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">
-                        {ex.bodyPart}
+                        {ex.body_part}
                       </span>
                       <span className="font-bold text-slate-800">{ex.name}</span>
                     </div>
                     <p className="text-slate-500 text-sm mt-1 truncate">{ex.description}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      {ex.reps}회 × {ex.sets}세트 &nbsp;|&nbsp; 들숨{ex.breathing.inhale}s
+                      {ex.default_reps}회 × {ex.default_sets}세트 &nbsp;|&nbsp; 들숨{ex.breathing.inhale}s
                       {ex.breathing.hold > 0 ? ` 참기${ex.breathing.hold}s` : ""} 날숨{ex.breathing.exhale}s
                     </p>
                   </div>
@@ -324,13 +397,13 @@ export default function AdminManagePage() {
                 <div key={p.id} className="bg-white rounded-2xl shadow p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <span className="font-bold text-slate-800">{p.patientName}</span>
-                      <span className="text-slate-400 text-sm ml-2">{p.exerciseIds.length}개 운동</span>
+                      <span className="font-bold text-slate-800">{p.patient_name_input}</span>
+                      <span className="text-slate-400 text-sm ml-2">{(p.items || []).length}개 운동</span>
                       {p.notes && (
                         <p className="text-xs text-slate-500 mt-0.5 truncate">{p.notes}</p>
                       )}
                       <p className="text-xs text-slate-400 mt-1">
-                        {new Date(p.createdAt).toLocaleDateString("ko-KR")}
+                        {new Date(p.created_at).toLocaleDateString("ko-KR")}
                       </p>
                     </div>
                     <div className="flex gap-2 shrink-0">
@@ -363,6 +436,89 @@ export default function AdminManagePage() {
             </div>
           </>
         )}
+
+        {/* ───── 진행 현황 탭 ───── */}
+        {tab === "logs" && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-slate-500 text-sm">최근 {logs.length}개의 활동</p>
+              <button
+                onClick={loadLogs}
+                className="text-xs text-blue-500 font-bold hover:underline"
+              >
+                새로고침
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {logs.length === 0 && (
+                <div className="text-center py-16 text-slate-400">
+                  <p className="text-4xl mb-3">📈</p>
+                  <p>아직 수행 로그가 없습니다.</p>
+                </div>
+              )}
+              {logs.map((log) => {
+                const painDiff = log.pain_score_after - log.pain_score_before;
+                return (
+                  <div key={log.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="font-bold text-slate-800">
+                          {log.prescription?.patient_name_input || "익명 환자"}
+                        </span>
+                        <span className="text-slate-400 text-xs ml-2">
+                          {new Date(log.created_at).toLocaleString("ko-KR", { 
+                            month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" 
+                          })}
+                        </span>
+                      </div>
+                      <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold uppercase tracking-tight">
+                        {log.exercise?.body_part}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-3">
+                      <p className="text-sm text-slate-700 font-medium">
+                        {log.exercise?.name}
+                      </p>
+                      <span className="text-[11px] text-slate-400">
+                        {log.completed_reps}회 × {log.completed_sets}세트 완료
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-slate-50 rounded-xl p-3">
+                      <div className="flex-1 text-center">
+                        <p className="text-[10px] text-slate-400 font-bold mb-1">운동 전 통증</p>
+                        <p className="text-lg font-bold text-slate-700">{log.pain_score_before}</p>
+                      </div>
+                      <div className="text-slate-300">→</div>
+                      <div className="flex-1 text-center">
+                        <p className="text-[10px] text-slate-400 font-bold mb-1">운동 후 통증</p>
+                        <div className="flex items-center justify-center gap-1">
+                          <p className="text-lg font-bold text-slate-700">{log.pain_score_after}</p>
+                          {painDiff !== 0 && (
+                            <span className={`text-[10px] font-bold ${painDiff < 0 ? "text-green-500" : "text-red-500"}`}>
+                              ({painDiff > 0 ? "+" : ""}{painDiff})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {log.feedback && (
+                      <div className="mt-3 bg-blue-50/50 rounded-xl p-3 border border-blue-50">
+                        <p className="text-[10px] text-blue-400 font-bold mb-1 uppercase tracking-wider">환자 피드백</p>
+                        <p className="text-sm text-slate-600 leading-relaxed italic">
+                          "{log.feedback}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* ───── 운동 편집 모달 ───── */}
@@ -387,8 +543,8 @@ export default function AdminManagePage() {
                 <label className="text-sm font-medium text-slate-600">부위</label>
                 <select
                   className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800 bg-white"
-                  value={form.bodyPart}
-                  onChange={(e) => setForm({ ...form, bodyPart: e.target.value })}
+                  value={form.body_part}
+                  onChange={(e) => setForm({ ...form, body_part: e.target.value })}
                 >
                   {BODY_PARTS.map((p) => <option key={p}>{p}</option>)}
                 </select>
@@ -399,7 +555,7 @@ export default function AdminManagePage() {
                 <textarea
                   className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800 resize-none"
                   rows={2}
-                  value={form.description}
+                  value={form.description || ""}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
@@ -433,8 +589,8 @@ export default function AdminManagePage() {
                   <input
                     type="number"
                     className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
-                    value={form.reps}
-                    onChange={(e) => setForm({ ...form, reps: Number(e.target.value) })}
+                    value={form.default_reps}
+                    onChange={(e) => setForm({ ...form, default_reps: Number(e.target.value) })}
                   />
                 </div>
                 <div>
@@ -442,8 +598,8 @@ export default function AdminManagePage() {
                   <input
                     type="number"
                     className="mt-1 w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none text-slate-800"
-                    value={form.sets}
-                    onChange={(e) => setForm({ ...form, sets: Number(e.target.value) })}
+                    value={form.default_sets}
+                    onChange={(e) => setForm({ ...form, default_sets: Number(e.target.value) })}
                   />
                 </div>
               </div>
@@ -526,7 +682,7 @@ export default function AdminManagePage() {
               </label>
               <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
                 {BODY_PARTS.map((part) => {
-                  const partExercises = exercises.filter((e) => e.bodyPart === part);
+                  const partExercises = exercises.filter((e) => e.body_part === part);
                   if (partExercises.length === 0) return null;
                   return (
                     <div key={part}>
@@ -544,7 +700,7 @@ export default function AdminManagePage() {
                           />
                           <span className="text-slate-700 text-sm">{ex.name}</span>
                           <span className="text-xs text-slate-400 ml-auto">
-                            {ex.reps}회 × {ex.sets}세트
+                            {ex.default_reps}회 × {ex.default_sets}세트
                           </span>
                         </label>
                       ))}
@@ -583,7 +739,7 @@ export default function AdminManagePage() {
             className="bg-white rounded-3xl shadow-2xl p-6 max-w-xs w-full text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-slate-800 mb-1">{qrTarget.patientName}님</h2>
+            <h2 className="text-lg font-bold text-slate-800 mb-1">{qrTarget.patient_name_input}님</h2>
             <p className="text-xs text-slate-400 mb-4">QR코드를 스캔하거나 링크를 공유하세요</p>
             <div className="flex justify-center mb-4">
               <QRCodeSVG value={prescriptionUrl(qrTarget)} size={180} />
