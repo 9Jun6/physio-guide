@@ -200,8 +200,8 @@ function applyPose(joints: Joints, t: number) {
   const elbowFlex  = THREE.MathUtils.lerp(10 * DEG, 100 * DEG, t);
   const spineFlex  = THREE.MathUtils.lerp(0,   8 * DEG, t);
 
-  // After root.rotation.set(0, -PI/2, -PI/2), root's local X = world Z (sagittal axis).
-  // All sagittal-plane flexion must use .rotation.x.
+  // root's local X = world +Z (body left-right axis).
+  // All sagittal-plane flexion (hip, knee, shoulder, elbow, spine) uses .rotation.x.
   joints.spine.rotation.x  = spineFlex;
 
   joints.lThigh.rotation.x = -hipFlex;
@@ -267,14 +267,14 @@ export default function KneeChest3D() {
     // ── Figure ──
     const joints = buildFigure(scene);
 
-    // Position figure: lying on back along +X axis
-    // Root is at hips; we rotate so the figure lies with head in +X direction
-    // "Standing" Y becomes the lying X; rotate -90° around Z
-    // rotation.set(rx, ry, rz) with XYZ order:
-    //   Ry(-90°): local +Z (chest) → world +X … then
-    //   Rz(-90°): local +Z (now world +X) → world +Y (up)
-    // Result: chest faces up, head points toward world +X
-    joints.root.rotation.set(0, -Math.PI / 2, -Math.PI / 2);
+    // Position figure: lying on back (supine) along +X axis
+    // rotation.set(rx, ry, rz) — XYZ Euler, matrix = Rx * Ry * Rz:
+    //   Rx(-90°): local +Z (chest) → world +Y (up) ✓
+    //             local +Y (head) → world -Z (into screen)
+    //   Rz(-90°): local +Y (now world -Z) → world +X (head right) ✓
+    // Result: chest faces up (+Y), head points toward world +X
+    //         root local X = world +Z = body left-right axis (sagittal rotation axis)
+    joints.root.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
     joints.root.position.set(0, 0.4, 0);
 
     // ── Animation loop ──
