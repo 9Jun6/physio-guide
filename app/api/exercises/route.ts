@@ -22,11 +22,13 @@ export async function GET() {
   });
 }
 
+import { config } from "@/lib/config";
+
 export async function POST(req: Request) {
   const body = await req.json();
   const { adminPassword, action, exercise } = body;
 
-  if (adminPassword !== process.env.ADMIN_PASSWORD) {
+  if (adminPassword !== config.admin.password) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
